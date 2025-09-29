@@ -2,6 +2,7 @@ import "./App.css";
 import HeroSection from "./components/HeroSection";
 import Navbar from "./components/Navbar";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import VipHeroSection from "./components/VipHeroSection";
 
 function App() {
 	return (
@@ -13,6 +14,7 @@ function App() {
 						<>
 							<Navbar />
 							<HeroSection />
+							<VipHeroSection />
 						</>
 					}
 				/>
