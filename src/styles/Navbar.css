@@ -2,7 +2,9 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  position: fixed;
+  position: sticky;
+  top: 0;
+  background: var(--secondary-color);
 }
 
 .promotion-banner {
