@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  position: fixed;
 }
 
 .promotion-banner {
@@ -9,9 +10,13 @@
   justify-content: space-between;
   align-items: center;
   background: var(--primary-color);
-  padding: 8px 50px;
+  padding: 8px 10%;
   color: var(--secondary-color);
   font-size: 0.85rem;
+}
+
+.promotion-banner.hidden {
+  display: none;
 }
 
 .promotion-text {
@@ -21,12 +26,20 @@
   font-family: var(--text-font);
 }
 
+.promotion-text h2 {
+  font-size: 0.85rem;
+}
+
+.close-icon {
+  cursor: pointer;
+}
+
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 50px;
-  border-bottom: solid 1px hsl(from var(--text-color) / 0.2);
+  padding: 18px 10%;
+  border-bottom: solid 1px hsl(from var(--text-color) h s calc(l / 5));
 }
 
 .logo {
@@ -34,12 +47,20 @@
   align-items: center;
   gap: 8px;
   color: var(--primary-color);
+  font-size: 1.15rem;
 }
 
 .nav-links {
   display: flex;
   gap: 32px;
+}
+
+.nav-item a {
   color: var(--text-color);
+}
+
+.nav-item a:hover {
+  color: var(--primary-color);
 }
 
 .nav-buttons {
@@ -50,11 +71,34 @@
 
 .search-input {
   border: none;
-  background-color: hsl(from var(--secondary-color) h s calc(l - 0.9));
+  background-color: hsl(from var(--secondary-color) h s calc(l + 2));
+  border-radius: 5px;
+  font-size: 0.9rem;
   padding: 8px 16px;
   outline: none;
+  color: var(--text-color);
+  border: solid 1px transparent;
+  font-family: var(--text-font);
+  min-width: 200px;
+  width: 100%;
+}
+
+.search-input::placeholder {
+  color: hsl(from var(--text-color) h s calc(l / 2));
 }
 
 .search-input:focus {
-  outline: hsl(from var(--secondary-color) h s calc(l - 0.7));
+  border: solid 1px hsl(from var(--text-color) h s calc(l / 5));
+}
+
+.login-button,
+.search-label {
+  cursor: pointer;
+  color: var(--text-color);
+  transition: 200ms;
+}
+
+.login-button:hover,
+.search-label:hover {
+  transform: translateY(-2px);
 }
