@@ -1,0 +1,20 @@
+:root {
+  --primary-color : #C1F17E;
+  --secondary-color : #080F17;
+  --text-color : #D6DDE6;
+  --details-color : #A7EE43;
+  --text-font : "Plus Jakarta Sans", sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  text-decoration: none;
+  list-style: none;
+}
+
+body {
+  background-color: var(--secondary-color);
+  font-family: var(--text-font);
+  color: var(--text-color);
+}
