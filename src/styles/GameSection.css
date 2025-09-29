@@ -1,0 +1,67 @@
+.game-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 96px 10%;
+  gap: 24px;
+  border-bottom: solid 1px hsl(from var(--text-color) h s calc(l / 4));
+}
+
+.game-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.game-card-link {
+  cursor: pointer;
+  width: 336px;
+  aspect-ratio: 1/1;
+  background-color: hsl(from var(--secondary-color) h s calc(l / 0.7));
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  border: solid 1px hsl(from var(--text-color) h s calc(l / 4));
+  position: relative;
+  overflow: hidden;
+}
+
+.game-card-img {
+  --deg: -5deg;
+  position: relative;
+  z-index: 1;
+  transition: 300ms;
+}
+
+.game-card:nth-child(even) .game-card-img {
+  --deg: 5deg;
+}
+
+.game-card:hover .game-card-img {
+  transform: rotateZ(var(--deg)) scale(1.1);
+}
+
+.blurry-img {
+  position: absolute;
+  z-index: 0;
+  transition: 300ms;
+  opacity: 0.5;
+}
+
+.game-card:hover .blurry-img {
+  filter: blur(50px);
+}
+
+.game-card-title {
+  opacity: 0;
+  transition: 300ms;
+  transform: translateY(-16px);
+  padding-top: 10px;
+}
+
+.game-card:hover .game-card-title {
+  opacity: 1;
+  transform: translateY(0);
+}
