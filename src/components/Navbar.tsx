@@ -1,15 +1,24 @@
 import "../styles/Navbar.css";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const Navbar = () => {
+  const [isBannerVisible, setIsBannerVisible] = useState(true);
+
+  function closeBanner() {
+    setIsBannerVisible(false);
+  }
   return (
     <div className="navbar-container">
-      <article className="promotion-banner">
+      <article
+        className={`promotion-banner ${isBannerVisible ? "" : "hidden"}`}
+      >
         <div className="promotion-text">
           <h2>Welcome to SpringLuck Casino !</h2>
           <p>Use code SPRING20 for 20% off!</p>
         </div>
         <svg
+          onClick={closeBanner}
           className="close-icon"
           width="14"
           height="14"
@@ -52,6 +61,7 @@ const Navbar = () => {
             name="search"
             id="search"
             placeholder="Search..."
+            autoComplete="off"
           />
           <label className="search-label" htmlFor="search">
             <svg

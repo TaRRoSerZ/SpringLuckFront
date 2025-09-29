@@ -1,9 +1,9 @@
 :root {
-  --primary-color : #C1F17E;
-  --secondary-color : #080F17;
-  --text-color : #D6DDE6;
-  --details-color : #A7EE43;
-  --text-font : "Plus Jakarta Sans", sans-serif;
+  --primary-color: #c1f17e;
+  --secondary-color: #080f17;
+  --text-color: #d6dde6;
+  --details-color: #a7ee43;
+  --text-font: "Plus Jakarta Sans", sans-serif;
 }
 
 * {
