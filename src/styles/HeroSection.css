@@ -1,0 +1,18 @@
+section.hero-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 48px;
+    padding: 96px 0;
+}
+
+h1 {
+    font-size: 9rem;
+    text-align: center;
+    line-height: 9.5rem;
+}
+
+img.main-image {
+    width: 90%;
+}
