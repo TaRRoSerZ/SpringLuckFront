@@ -1,0 +1,188 @@
+.sloppy-bj {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 50px 10%;
+}
+
+.sloppy-game-container {
+  width: 100%;
+  height: 100%;
+  min-height: 75vh;
+  background: hsl(
+    from var(--secondary-color) calc(h + 2) calc(s - 20) calc(l + 4)
+  );
+  border-radius: 16px;
+  border: solid 1px hsl(from var(--secondary-color) h calc(s - 36) calc(l + 16));
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.sloppy-separator {
+  width: 90%;
+  height: 1px;
+  background: hsl(from var(--secondary-color) h calc(s - 36) calc(l + 16));
+}
+
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(10px, 3vw, 24px);
+  position: relative;
+}
+
+.cards-container.your-guy {
+  flex-direction: column-reverse;
+}
+
+.player-icon {
+  position: absolute;
+  z-index: 10;
+  transition: 0.5s;
+}
+
+.bj-player-icon {
+  bottom: 0;
+  right: 0;
+  transform: translateX(62%);
+}
+
+.bj-dealer-icon {
+  top: 0;
+  left: 0;
+  transform: translateX(-62%);
+}
+
+.bj-score {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.sloppy-cards {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  perspective: 500px;
+  transform-style: preserve-3d;
+}
+
+.sloppy-card {
+  /* Auto layout */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  max-width: 149px;
+  width: 26vw;
+  aspect-ratio: 3/5;
+
+  background: var(--secondary-color);
+  border: 1px solid hsl(from var(--secondary-color) h s calc(l + 10));
+  border-radius: 8px;
+
+  color: hsl(from var(--secondary-color) h s calc(l + 30));
+  font-size: 3rem;
+  font-weight: 700;
+
+  animation: slideIn 0.5s forwards;
+  opacity: 0;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  transition: 0.5s;
+}
+
+.cards-container.bj-guy .sloppy-card {
+  animation: dealerSlideIn 0.5s forwards;
+}
+
+@keyframes slideIn {
+  0% {
+    transform: translateY(100%) rotateY(-180deg);
+    opcaity: 0;
+  }
+  100% {
+    transform: translateY(0) rotateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes dealerSlideIn {
+  0% {
+    transform: translateY(-100%) rotateY(-180deg);
+    opcaity: 0;
+  }
+  100% {
+    transform: translateY(0) rotateY(0);
+    opacity: 1;
+  }
+}
+
+.game-status {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  text-wrap: nowrap;
+  text-align: center;
+  transform: translate(-50%, -50%) scale(0);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--secondary-color);
+  border: solid 2px hsl(from var(--secondary-color) h calc(s - 36) calc(l + 16));
+  padding: 35px 50px;
+  font-size: 2rem;
+  color: var(--text-color);
+  font-weight: 700;
+  border-radius: 8px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  animation: scaleIn 0.3s forwards;
+  animation-delay: 1s;
+  z-index: 20;
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.sloppy-controls {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.play-button {
+  background: var(--secondary-color);
+  border: none;
+  font-family: var(--text-font);
+  color: var(--text-color);
+  border: solid 1px hsl(from var(--secondary-color) h calc(s - 36) calc(l + 16));
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}

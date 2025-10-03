@@ -1,0 +1,78 @@
+.diddy-sco {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 50px 10%;
+}
+
+.diddy-sco-canvas {
+  border-radius: 16px;
+  border: solid 1px hsl(from var(--secondary-color) h calc(s - 36) calc(l + 16));
+}
+
+.diddy-sco-button {
+  background-color: var(--details-color);
+  color: var(--secondary-color);
+  font-weight: bold;
+  font-family: var(--text-font);
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border: solid 1px hsl(from var(--details-color) h s calc(l - 35));
+  box-shadow: 0 4px 0 0 hsl(from var(--details-color) h s calc(l - 35));
+  transition: 200ms;
+}
+
+.diddy-sco-button:active {
+  box-shadow: none;
+  transform: translateY(4px);
+}
+
+.diddy-sco-button:hover:not(:active) {
+  box-shadow: 0 3px 0 0 hsl(from var(--details-color) h s calc(l - 35));
+  transform: translateY(1px);
+}
+
+.diddy-sco-button:disabled {
+  transform: none;
+  opacity: 0.25;
+  pointer-events: none;
+  cursor: not-allowed;
+  filter: grayscale(100%);
+}
+
+.win-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  text-wrap: nowrap;
+  text-align: center;
+  transform: translate(-50%, -50%) scale(0);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: var(--secondary-color);
+  border: solid 2px hsl(from var(--secondary-color) h calc(s - 36) calc(l + 16));
+  padding: 35px 50px;
+  font-size: 2rem;
+  color: var(--text-color);
+  font-weight: 700;
+  border-radius: 8px;
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.25);
+  animation: scaleIn 0.3s forwards;
+  z-index: 20;
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
