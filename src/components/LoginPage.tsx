@@ -20,14 +20,14 @@ const LoginPage = () => {
           <form className="login-form">
             <div className="login-inputs">
               <input
-                className="input"
+                className="login-input"
                 type="email"
                 name="email"
                 id="email"
                 placeholder="Email"
               />
               <input
-                className="input"
+                className="login-input"
                 type="password"
                 name="password"
                 id="password"

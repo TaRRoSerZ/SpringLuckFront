@@ -68,11 +68,11 @@
 }
 
 .game-cards-container::-moz-scrollbar {
-  height: 10px;
+  display: none;
 }
 
 .game-cards-container::-webkit-scrollbar {
-  height: 10px;
+  display: none;
 }
 
 .game-card {
