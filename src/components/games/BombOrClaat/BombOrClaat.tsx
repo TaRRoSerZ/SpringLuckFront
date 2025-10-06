@@ -144,7 +144,7 @@ export default function BombOrClaat({
 	return (
 		<>
 			<Navbar />
-			<div className="wrapper">
+			<div className="wrapper bmborclt">
 				{/* Titre global en haut, sticky */}
 				<div className="pageHeader">
 					<h2 className="title">Bomb or claat</h2>
@@ -152,7 +152,7 @@ export default function BombOrClaat({
 
 				{/* Layout 2 colonnes : grille à gauche, panneau à droite */}
 				<div className="content">
-					<div className="left">
+					<div className="left bmborclt">
 						<div className="gridOuter">
 							<div
 								className="grid"

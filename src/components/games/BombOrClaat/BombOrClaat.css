@@ -17,7 +17,7 @@
 }
 
 /* ===== Structure ===== */
-.wrapper {
+.wrapper .bmborclt {
   width: 100%;
   padding: var(--page-pad);
   display: grid;
@@ -53,7 +53,7 @@
 }
 
 /* Panneau gauche */
-.left {
+.left .bmborclt{
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 20px;
