@@ -6,7 +6,7 @@ section.vip-hero-section {
   gap: 30px;
   border-bottom: solid 1px hsl(from var(--text-color) h s calc(l / 4));
   padding: 48px 10%;
-  margin: 48px 0;
+  margin-top: 48px;
 }
 
 div.titles {

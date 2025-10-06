@@ -6,26 +6,28 @@ import HeroSection from "./components/HeroSection";
 import Navbar from "./components/Navbar";
 import GameSection from "./components/GameSection";
 import VipHeroSection from "./components/VipHeroSection";
+import Footer from "./components/Footer";
 
 function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <Navbar />
-              <HeroSection />
-              <GameSection />
-              <VipHeroSection />
-            </>
-          }
-        />
-        <Route path="/game/:id" element={<GameContainer />} />
-      </Routes>
-    </BrowserRouter>
-  );
+	return (
+		<BrowserRouter>
+			<Routes>
+				<Route
+					path="/"
+					element={
+						<>
+							<Navbar />
+							<HeroSection />
+							<GameSection />
+							<VipHeroSection />
+							<Footer />
+						</>
+					}
+				/>
+				<Route path="/game/:id" element={<GameContainer />} />
+			</Routes>
+		</BrowserRouter>
+	);
 }
 
 export default App;
