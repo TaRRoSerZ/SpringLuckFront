@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import SloppyBj from "./games/SloppyBj/SloppyBj";
 import DiddySco from "./games/DiddySco/DiddySco";
+import RiggedPaperScissors from "./games/RiggedPaperScissors/RiggedPaperScissors";
 import type { JSX } from "react";
 
 const GameContainer = () => {
@@ -9,6 +10,7 @@ const GameContainer = () => {
   const gameMap: Record<string, JSX.Element> = {
     "2": <SloppyBj />,
     "3": <DiddySco />,
+    "4": <RiggedPaperScissors />,
   };
 
   const gameComponent = gameMap[id || ""];

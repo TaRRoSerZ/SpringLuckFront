@@ -18,7 +18,12 @@ const cardsContent = [
   {
     id: 3,
     title: "Diddy Scothèque",
-    imageUrl: "/icons/DiddyScotheque.svg",
+    imageUrl: "/icons/diddySco.svg",
+  },
+  {
+    id: 4,
+    title: "Rigged Paper Scissors",
+    imageUrl: "/icons/rigged-paper-scissors.svg",
   },
 ];
 

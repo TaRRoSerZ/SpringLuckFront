@@ -36,13 +36,13 @@ const Navbar = () => {
         </svg>
       </article>
       <nav className="navbar">
-        <a href="#home" className="logo">
+        <a href="/#home" className="logo">
           <img src="/icons/logo.svg" width={35} height={35} alt="Logo" />
           <h2>SpringLuck</h2>
         </a>
         <ul className="nav-links">
           <li className="nav-item">
-            <a href="#games">Games</a>
+            <a href="/#games">Games</a>
           </li>
           <li className="nav-item">
             <Link to="/vip">VIP</Link>
