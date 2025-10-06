@@ -285,26 +285,6 @@ export default function BombOrClaat({
 						</div>
 					</aside>
 				</div>
-
-				{(state === "lost" || state === "won" || state === "cashed") && (
-					<div className="footer">
-						{state === "lost" && (
-							<button className="primary" onClick={reset}>
-								Rejouer
-							</button>
-						)}
-						{(state === "won" || state === "cashed") && (
-							<>
-								<div className="payout">
-									Gain simulé: <strong>{currentMultiplier}×</strong>
-								</div>
-								<button className="primary" onClick={reset}>
-									Nouvelle partie
-								</button>
-							</>
-						)}
-					</div>
-				)}
 			</div>
 		</>
 	);
