@@ -65,6 +65,7 @@
   overflow-x: scroll;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
+  scrollbar-width: none;
 }
 
 .game-cards-container::-moz-scrollbar {
