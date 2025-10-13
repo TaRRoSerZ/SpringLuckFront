@@ -8,6 +8,7 @@ import GameSection from "./components/GameSection";
 import VipHeroSection from "./components/VipHeroSection";
 import Footer from "./components/Footer";
 import LoginPage from "./components/LoginPage";
+import SignupPage from "./components/SignupPage";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         />
         <Route path="/game/:id" element={<GameContainer />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
       </Routes>
     </BrowserRouter>
   );

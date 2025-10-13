@@ -45,6 +45,7 @@
   padding: 18px 10%;
   border-bottom: solid 1px hsl(from var(--text-color) h s calc(l / 5));
   gap: 50px;
+  overflow: hidden;
 }
 
 .logo {
