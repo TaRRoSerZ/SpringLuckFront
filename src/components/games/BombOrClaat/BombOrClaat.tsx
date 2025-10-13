@@ -108,10 +108,14 @@ export default function BombOrClaat({
 			);
 
 			if (cell.hasBomb) {
+				// reveal all cells so the player can see bomb placements
+				setCells((prev) => prev.map((c) => ({ ...c, revealed: true })));
 				setState("lost");
 			} else {
 				setSafeRevealed((n) => n + 1);
 				if (safeRevealed + 1 >= total - bombs) {
+					// reveal all on win as well
+					setCells((prev) => prev.map((c) => ({ ...c, revealed: true })));
 					setState("won");
 				}
 			}
@@ -121,6 +125,8 @@ export default function BombOrClaat({
 
 	const cashOut = useCallback(() => {
 		if (state !== "running") return;
+		// reveal all cells when player cashes out
+		setCells((prev) => prev.map((c) => ({ ...c, revealed: true })));
 		setState("cashed");
 	}, [state]);
 
