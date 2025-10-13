@@ -76,3 +76,24 @@
     opacity: 1;
   }
 }
+
+/* Payout modal */
+.payout-modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.5);
+  z-index: 9999;
+}
+.payout-card {
+  background: hsl(220 10% 6%);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 20px 24px;
+  border-radius: 12px;
+  text-align: center;
+  color: #e8ebf3;
+  min-width: 260px;
+}
+.payout-card h3 { margin: 0 0 8px; }
+.payout-amount { font-size: 20px; font-weight: 800; margin: 8px 0 16px; }

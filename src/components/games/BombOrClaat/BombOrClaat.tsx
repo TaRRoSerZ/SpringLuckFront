@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import "./BombOrClaat.css";
 import Navbar from "../../Navbar";
+import BetSection from "../../BetSection";
 
 type Cell = {
 	id: number;
@@ -46,7 +47,40 @@ export default function BombOrClaat({
 	const [seed, setSeed] = useState<number>(() => Date.now() % 2147483647);
 	const total = rows * cols;
 
+	// Bet & payout state
+	const [betAmount, setBetAmount] = useState<number>(0);
+	const [betPlaced, setBetPlaced] = useState<boolean>(false);
+
+	// load balance from localStorage
+	const [balance, setBalance] = useState<number>(() => {
+		const raw = localStorage.getItem("balance");
+		const n = raw ? Number(raw) : 0;
+		return Number.isFinite(n) ? n : 0;
+	});
+
+	// helper to update localStorage balance
+	function updateBalance(newBal: number) {
+		setBalance(newBal);
+		localStorage.setItem("balance", String(Number(newBal.toFixed(2))));
+	}
+
+	// handle placing a bet from BetSection
+	function handlePlace(amount: number) {
+		if (amount <= 0) return false;
+		if (amount > balance) return false;
+		// deduct immediately
+		updateBalance(Number((balance - amount).toFixed(2)));
+		setBetAmount(amount);
+		setBetPlaced(true);
+		return true;
+	}
+	const [finalPayout, setFinalPayout] = useState<number | null>(null);
+	const [showPayout, setShowPayout] = useState(false);
+
 	const startGame = useCallback(() => {
+		// ensure bet is placed and > 0
+		if (!betPlaced || betAmount <= 0) return;
+
 		const rng = makeRng(seed);
 		const base: Cell[] = Array.from({ length: total }, (_, i) => ({
 			id: i,
@@ -64,13 +98,15 @@ export default function BombOrClaat({
 		setCells(prepared);
 		setSafeRevealed(0);
 		setState("running");
-	}, [bombs, cols, seed, total]);
+	}, [bombs, cols, seed, total, betPlaced, betAmount]);
 
 	const reset = useCallback(() => {
 		setSeed((s) => (s * 1103515245 + 12345) % 2147483647);
 		setCells([]);
 		setSafeRevealed(0);
 		setState("idle");
+		setBetPlaced(false);
+		setBetAmount(0);
 	}, []);
 
 	const revealedCount = safeRevealed;
@@ -87,6 +123,15 @@ export default function BombOrClaat({
 		}
 		return Number(m.toFixed(3));
 	}, [revealedCount, total, bombs]);
+
+	function computeMultiplierFor(revealed: number) {
+		if (revealed === 0) return 1;
+		let m = 1;
+		for (let k = 0; k < revealed; k++) {
+			m *= (total - k) / (total - bombs - k);
+		}
+		return Number(m.toFixed(3));
+	}
 
 	const nextPickMultiplier = useMemo(() => {
 		if (state !== "running") return 0;
@@ -117,6 +162,12 @@ export default function BombOrClaat({
 					// reveal all on win as well
 					setCells((prev) => prev.map((c) => ({ ...c, revealed: true })));
 					setState("won");
+					// compute payout and show
+					const payout = Number(
+						(betAmount * computeMultiplierFor(safeRevealed + 1)).toFixed(2)
+					);
+					setFinalPayout(payout);
+					setShowPayout(true);
 				}
 			}
 		},
@@ -128,6 +179,12 @@ export default function BombOrClaat({
 		// reveal all cells when player cashes out
 		setCells((prev) => prev.map((c) => ({ ...c, revealed: true })));
 		setState("cashed");
+		// compute payout and show
+		const payout = Number((betAmount * currentMultiplier).toFixed(2));
+		setFinalPayout(payout);
+		setShowPayout(true);
+		// credit payout to balance
+		updateBalance(Number((balance + payout).toFixed(2)));
 	}, [state]);
 
 	const statusText = useMemo(() => {
@@ -240,7 +297,11 @@ export default function BombOrClaat({
 								/>
 							</label>
 							{state === "idle" ? (
-								<button className="primary" onClick={startGame}>
+								<button
+									className="primary"
+									onClick={startGame}
+									disabled={betAmount <= 0}
+								>
 									Démarrer
 								</button>
 							) : (
@@ -292,6 +353,27 @@ export default function BombOrClaat({
 					</aside>
 				</div>
 			</div>
+			<BetSection balance={balance} onPlace={handlePlace} />
+
+			{/* Payout modal */}
+			{showPayout && finalPayout !== null && (
+				<div className="payout-modal" role="dialog" aria-modal="true">
+					<div className="payout-card">
+						<h3>Résultat</h3>
+						<p className="payout-amount">{finalPayout.toFixed(2)} $</p>
+						<button
+							className="primary"
+							onClick={() => {
+								setShowPayout(false);
+								setFinalPayout(null);
+								reset();
+							}}
+						>
+							OK
+						</button>
+					</div>
+				</div>
+			)}
 		</>
 	);
 }
