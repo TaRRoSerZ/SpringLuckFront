@@ -45,7 +45,6 @@
   padding: 18px 10%;
   border-bottom: solid 1px hsl(from var(--text-color) h s calc(l / 5));
   gap: 50px;
-  overflow: hidden;
 }
 
 .logo {
@@ -202,7 +201,7 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   padding: 8px;
   display: none;
-  z-index: 1200;
+  z-index: 2000;
 }
 
 .balance.open .balance-dropdown {

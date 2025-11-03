@@ -1,7 +1,7 @@
 import Navbar from "./Navbar";
 import Beams from "./reactbits/Beams";
 import "../styles/LoginPage.css";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 type AuthLayoutProps = {
   title: string;
