@@ -1,0 +1,191 @@
+/* Deposit Page - matches LoginPage aesthetic */
+
+.deposit-form {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  gap: 20px;
+  text-align: center;
+}
+
+.deposit-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.deposit-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.deposit-label {
+  font-size: 0.875rem;
+  color: var(--text-color);
+  font-weight: 500;
+  padding-left: 4px;
+}
+
+.deposit-input {
+  padding: 12px 20px;
+  font-family: var(--text-font);
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: solid 1px hsl(from var(--secondary-color) h calc(s - 36) calc(l + 16));
+  border-radius: 5px;
+  color: var(--text-color);
+  transition: border-color 160ms ease, box-shadow 200ms ease,
+    transform 180ms ease, background-color 160ms ease;
+}
+
+.deposit-input::placeholder {
+  color: hsl(from var(--text-color) h s calc(l / 2));
+}
+
+.deposit-input:hover {
+  border-color: hsl(from var(--secondary-color) h calc(s - 24) calc(l + 22));
+}
+
+.deposit-input:focus {
+  border-color: var(--details-color);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--details-color) 24%, transparent);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+/* Amount input with currency symbol */
+.amount-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.currency-symbol {
+  position: absolute;
+  left: 16px;
+  color: var(--primary-color);
+  font-size: 1.125rem;
+  font-weight: 600;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.amount-input {
+  padding-left: 36px;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+/* Row for expiry + CVC */
+.deposit-inputs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* Test card info box */
+.test-card-info {
+  background: rgba(167, 238, 67, 0.08);
+  border: 1px solid rgba(167, 238, 67, 0.2);
+  border-radius: 8px;
+  padding: 14px 18px;
+  text-align: left;
+  margin-top: 8px;
+}
+
+.info-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin-bottom: 6px;
+}
+
+.info-text {
+  font-size: 0.8rem;
+  color: var(--text-color);
+  margin: 3px 0;
+  line-height: 1.4;
+}
+
+.info-text strong {
+  color: var(--primary-color);
+  font-family: "Courier New", monospace;
+  letter-spacing: 0.3px;
+}
+
+/* Deposit button */
+.deposit-btn {
+  padding: 12px 20px;
+  font-family: var(--text-font);
+  font-size: 1rem;
+  background: var(--details-color);
+  backdrop-filter: blur(10px);
+  border: solid 1px hsl(from var(--details-color) h s calc(l - 36));
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--secondary-color);
+  transition: background-color 200ms ease, box-shadow 220ms ease,
+    border-color 200ms ease;
+  margin-top: 8px;
+}
+
+.deposit-btn:hover {
+  background: hsl(from var(--details-color) h s calc(l - 6));
+  box-shadow: 0 0 0 0 transparent;
+}
+
+.deposit-btn:active {
+  transform: scale(0.98);
+}
+
+.deposit-btn:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary-color) 45%, transparent);
+  outline-offset: 2px;
+}
+
+/* Responsiveness */
+@media screen and (max-width: 480px) {
+  .deposit-inputs-row {
+    grid-template-columns: 1fr;
+  }
+
+  .test-card-info {
+    padding: 12px 14px;
+  }
+
+  .info-text {
+    font-size: 0.75rem;
+  }
+}
+
+@media screen and (max-width: 360px) {
+  .deposit-input {
+    padding: 10px 16px;
+  }
+
+  .amount-input {
+    padding-left: 32px;
+  }
+
+  .currency-symbol {
+    left: 12px;
+  }
+
+  .deposit-btn {
+    padding: 10px 16px;
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .deposit-input,
+  .deposit-btn {
+    transition: none !important;
+  }
+}
