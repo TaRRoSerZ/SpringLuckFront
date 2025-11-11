@@ -40,13 +40,6 @@ export const initKeycloak = async (
 
     if (authenticated) {
       console.log("✅ User is authenticated");
-      // Stocker les tokens dans sessionStorage
-      if (keycloak.token) {
-        sessionStorage.setItem("access_token", keycloak.token);
-      }
-      if (keycloak.refreshToken) {
-        sessionStorage.setItem("refresh_token", keycloak.refreshToken);
-      }
       onAuthSuccess?.();
     } else {
       console.log("ℹ️ User is not authenticated");
@@ -60,10 +53,6 @@ export const initKeycloak = async (
         .then((refreshed) => {
           if (refreshed && keycloak.token) {
             console.log("✅ Token refreshed");
-            sessionStorage.setItem("access_token", keycloak.token);
-            if (keycloak.refreshToken) {
-              sessionStorage.setItem("refresh_token", keycloak.refreshToken);
-            }
           }
         })
         .catch(() => {
@@ -79,53 +68,33 @@ export const initKeycloak = async (
   }
 };
 
-/**
- * Redirige vers la page de login Keycloak
- */
 export const login = () => {
   keycloak.login({
     redirectUri: window.location.origin + "/dashboard",
   });
 };
 
-/**
- * Redirige vers la page d'inscription Keycloak
- */
 export const register = () => {
   keycloak.register({
     redirectUri: window.location.origin + "/dashboard",
   });
 };
 
-/**
- * Déconnecte l'utilisateur
- */
 export const logout = () => {
-  sessionStorage.removeItem("access_token");
-  sessionStorage.removeItem("refresh_token");
   sessionStorage.removeItem("balance");
   keycloak.logout({
     redirectUri: window.location.origin,
   });
 };
 
-/**
- * Vérifie si l'utilisateur est authentifié
- */
 export const isAuthenticated = (): boolean => {
   return keycloak.authenticated || false;
 };
 
-/**
- * Récupère le token d'accès
- */
 export const getToken = (): string | undefined => {
   return keycloak.token;
 };
 
-/**
- * Récupère les informations utilisateur depuis le token
- */
 export const getUserInfo = () => {
   return keycloak.tokenParsed;
 };

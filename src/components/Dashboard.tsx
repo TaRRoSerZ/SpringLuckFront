@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -14,6 +14,9 @@ import {
   type Transaction,
 } from "../services/transactionService";
 
+import type { UserData } from "../services/authService_new";
+import { getUserData } from "../services/authService_new";
+
 interface UserInfo {
   sub: string;
   email?: string;
@@ -28,78 +31,71 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState<UserData | null>(null);
+
+  const loadDashboardData = async () => {
+    setLoading(true);
+    try {
+      const user = getUserInfo();
+      setUserInfo(user as UserInfo | null);
+
+      const userData = await getUserData();
+      setUserData(userData);
+      if (user && userData && userData.id) {
+        const balance = (userData.balance / 100).toFixed(2);
+        sessionStorage.setItem("balance", balance);
+        const token = getToken();
+        if (token) {
+          const fetchedTransactions = await fetchUserTransactions(
+            userData.id,
+            token
+          );
+          setTransactions(fetchedTransactions);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading user data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStorageChange = useCallback(() => {
+    loadDashboardData();
+  }, []);
 
   useEffect(() => {
-    // Vérifie l'authentification
     if (!isAuthenticated()) {
       navigate("/");
       return;
     }
 
-    const loadDashboardData = async () => {
-      try {
-        // Récupère les infos utilisateur depuis le token Keycloak
-        const user = getUserInfo();
-        setUserInfo(user as UserInfo | null);
-
-        const token = getToken();
-        const userEmail = user?.email;
-
-        if (userEmail && token) {
-          // 1️⃣ Récupérer les infos complètes du user depuis le backend (avec la balance)
-          const userResponse = await fetch(
-            `http://localhost:8083/users/${userEmail}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          if (userResponse.ok) {
-            const userData = await userResponse.json();
-            const userBalance = userData.balance / 100 || 0;
-            setBalance(userBalance);
-            sessionStorage.setItem("balance", userBalance.toString());
-          }
-
-          // 2️⃣ Récupérer les transactions
-          const userId = user?.sub;
-          if (userId) {
-            const txs = await fetchUserTransactions(userId, token);
-            setTransactions(txs);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading dashboard:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadDashboardData();
-
-    // Écouter les changements de storage (après dépôt)
-    const handleStorageChange = () => {
-      loadDashboardData();
-    };
 
     window.addEventListener("storage", handleStorageChange);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };
-  }, [navigate]);
-  const handleLogout = () => {
-    logout();
-  };
+  }, [navigate, handleStorageChange]);
 
   const pendingTransactions = transactions.filter(
     (t) => t.status === "pending"
   );
+
+  const formattedBalance = useMemo(() => {
+    const balance = userData?.balance ? userData.balance / 100 : 0;
+    try {
+      return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "EUR",
+        maximumFractionDigits: 2,
+      }).format(balance);
+    } catch {
+      return `${balance.toFixed(2)} €`;
+    }
+  }, [userData]);
 
   if (loading) {
     return (
@@ -107,7 +103,7 @@ const Dashboard = () => {
         <Navbar />
         <div className="dashboard-container">
           <div className="dashboard-loading">
-            <p>Loading your dashboard...</p>
+            <div className="loader"></div>
           </div>
         </div>
         <Footer />
@@ -126,7 +122,6 @@ const Dashboard = () => {
       <Navbar />
       <div className="dashboard-container">
         <div className="dashboard-content">
-          {/* Header Section */}
           <div className="dashboard-header">
             <div className="welcome-section">
               <h1 className="welcome-title">
@@ -137,8 +132,8 @@ const Dashboard = () => {
                 Here's what's happening with your account today.
               </p>
             </div>
-            <button className="logout-btn" onClick={handleLogout}>
-              🚪 Logout
+            <button className="logout-btn" onClick={logout}>
+              Logout
             </button>
           </div>
 
@@ -148,7 +143,7 @@ const Dashboard = () => {
               <div className="stat-icon">💰</div>
               <div className="stat-info">
                 <p className="stat-label">Total Balance</p>
-                <p className="stat-value">${balance.toFixed(2)}</p>
+                <p className="stat-value">{formattedBalance}</p>
               </div>
             </div>
 
@@ -173,18 +168,12 @@ const Dashboard = () => {
               <div className="stat-info">
                 <p className="stat-label">Completed</p>
                 <p className="stat-value">
-                  {
-                    transactions.filter(
-                      (t) =>
-                        t.status === "completed" || t.status === "succeeded"
-                    ).length
-                  }
+                  {transactions.filter((t) => t.status === "CONFIRMED").length}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* User Info Section */}
           <div className="info-section">
             <h2 className="section-title">Account Information</h2>
             <div className="user-info-grid">
@@ -211,13 +200,12 @@ const Dashboard = () => {
               <div className="info-item">
                 <span className="info-label">User ID</span>
                 <span className="info-value user-id">
-                  {userInfo?.sub?.substring(0, 8) || "N/A"}...
+                  {userData?.id || "N/A"}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Recent Transactions */}
           <div className="transactions-section">
             <h2 className="section-title">
               Recent Transactions ({transactions.length} total)
@@ -237,7 +225,7 @@ const Dashboard = () => {
                     key={transaction.id}
                     className={`transaction-item ${transaction.type}`}>
                     <div className="transaction-icon">
-                      {transaction.type === "deposit" ? "💵" : "🎰"}
+                      {transaction.type === "DEPOSIT" ? "💵" : "🎰"}
                     </div>
                     <div className="transaction-details">
                       <p className="transaction-description">
@@ -253,7 +241,7 @@ const Dashboard = () => {
                               return "Invalid date";
                             }
 
-                            return date.toLocaleDateString("en-US", {
+                            return date.toLocaleDateString("fr-FR", {
                               month: "short",
                               day: "numeric",
                               year: "numeric",
@@ -267,11 +255,11 @@ const Dashboard = () => {
                     <div className="transaction-amount">
                       <p
                         className={`amount ${
-                          transaction.type === "deposit"
+                          transaction.type === "DEPOSIT"
                             ? "positive"
                             : "negative"
                         }`}>
-                        {transaction.type === "deposit" ? "+" : "-"}$
+                        {transaction.type === "DEPOSIT" ? "+" : "-"}$
                         {(transaction.amount / 100).toFixed(2)}
                       </p>
                       <span className={`status-badge ${transaction.status}`}>
@@ -284,7 +272,6 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Quick Actions */}
           <div className="quick-actions">
             <h2 className="section-title">Quick Actions</h2>
             <div className="actions-grid">

@@ -1,35 +1,22 @@
-// Service de synchronisation avec le backend Spring
-
 const API_BASE_URL = "http://localhost:8083";
 
-/**
- * Décode le JWT token pour extraire les informations utilisateur
- */
-const decodeToken = (
-  token: string
-): { email?: string; sub?: string } | null => {
-  try {
-    const base64Url = token.split(".")[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error("Failed to decode token:", error);
-    return null;
-  }
-};
+import { getUserInfo, isAuthenticated, getToken } from "../keycloak/keycloak";
+
+export interface UserData {
+  id: string;
+  balance: number;
+}
 
 /**
  * Synchronise l'utilisateur Keycloak avec le backend Spring
  */
-export const syncUser = async (accessToken: string): Promise<boolean> => {
+export const syncUser = async (): Promise<boolean> => {
+  if (!isAuthenticated()) {
+    console.error("User is not authenticated, cannot sync");
+    return false;
+  }
   try {
-    const userInfo = decodeToken(accessToken);
+    const userInfo = getUserInfo();
     if (!userInfo || !userInfo.email) {
       console.error("Cannot decode token for sync or missing email");
       return false;
@@ -39,7 +26,7 @@ export const syncUser = async (accessToken: string): Promise<boolean> => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${getToken()}`,
       },
       body: JSON.stringify({ email: userInfo.email }),
     });
@@ -49,7 +36,6 @@ export const syncUser = async (accessToken: string): Promise<boolean> => {
       console.error("User sync failed:", errorData);
       return false;
     }
-
     console.log("✅ User synced successfully");
     return true;
   } catch (error) {
@@ -58,6 +44,39 @@ export const syncUser = async (accessToken: string): Promise<boolean> => {
   }
 };
 
+export const getUserData = async (): Promise<UserData | null> => {
+  if (!isAuthenticated()) {
+    console.error("User is not authenticated, cannot fetch user data");
+    return null;
+  }
+  const userInfo = getUserInfo();
+  if (!userInfo || !userInfo.email) {
+    console.error("Cannot decode token to get user email");
+    return null;
+  }
+  const userEmail = userInfo.email;
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/${userEmail}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch user data");
+      return null;
+    }
+
+    const data: UserData = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return null;
+  }
+};
+
 export default {
   syncUser,
+  getUserData,
 };

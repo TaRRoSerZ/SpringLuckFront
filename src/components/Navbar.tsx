@@ -1,7 +1,8 @@
 import "../styles/Navbar.css";
 import { Link } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { isAuthenticated, logout, login } from "../keycloak/keycloak";
+import { getUserData } from "../services/authService_new";
 
 const Navbar = () => {
   const [isBannerVisible, setIsBannerVisible] = useState(true);
@@ -29,29 +30,55 @@ const Navbar = () => {
     setIsBannerVisible(false);
   }
 
-  // Initialize token + balance from sessionStorage and keep in sync.
-  useEffect(() => {
-    // Vérifie l'authentification avec la fonction du service
-    setIsLoggedIn(isAuthenticated());
+  // Fonction pour charger la balance depuis le backend
+  const loadBalance = useCallback(async () => {
+    if (!isAuthenticated()) {
+      setBalance(0);
+      return;
+    }
 
-    const rawBalance = sessionStorage.getItem("balance");
-    const parsed = rawBalance ? Number(rawBalance) : 0;
-    setBalance(Number.isFinite(parsed) ? parsed : 0);
-
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === "access_token" || e.key === "refresh_token") {
-        setIsLoggedIn(isAuthenticated());
+    try {
+      const userData = await getUserData();
+      if (userData && userData.balance !== undefined) {
+        const balanceInEuros = userData.balance / 100;
+        setBalance(balanceInEuros);
+        sessionStorage.setItem("balance", balanceInEuros.toFixed(2));
       }
-      if (e.key === "balance") {
-        const v = e.newValue ? Number(e.newValue) : 0;
-        setBalance(Number.isFinite(v) ? v : 0);
-      }
-    };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    } catch (error) {
+      console.error("Error loading balance:", error);
+      const rawBalance = sessionStorage.getItem("balance");
+      const parsed = rawBalance ? Number(rawBalance) : 0;
+      setBalance(Number.isFinite(parsed) ? parsed : 0);
+    }
   }, []);
 
-  // Track viewport to toggle mobile behaviors (no hover/dropdown toggle on mobile)
+  useEffect(() => {
+    const authenticated = isAuthenticated();
+    setIsLoggedIn(authenticated);
+
+    if (authenticated) {
+      loadBalance();
+    } else {
+      const rawBalance = sessionStorage.getItem("balance");
+      const parsed = rawBalance ? Number(rawBalance) : 0;
+      setBalance(Number.isFinite(parsed) ? parsed : 0);
+    }
+
+    const onStorage = () => {
+      const authStatus = isAuthenticated();
+      setIsLoggedIn(authStatus);
+
+      if (authStatus) {
+        loadBalance();
+      } else {
+        setBalance(0);
+      }
+    };
+
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [loadBalance]);
+
   useEffect(() => {
     const mql = window.matchMedia("(max-width: 768px)");
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
@@ -75,7 +102,7 @@ const Navbar = () => {
 
   const formattedBalance = useMemo(() => {
     try {
-      return new Intl.NumberFormat(undefined, {
+      return new Intl.NumberFormat("fr-FR", {
         style: "currency",
         currency: "EUR",
         maximumFractionDigits: 2,

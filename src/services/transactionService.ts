@@ -45,38 +45,6 @@ export const fetchUserTransactions = async (
   }
 };
 
-/**
- * Calcule le total des transactions (seulement les completed)
- */
-export const calculateTotalBalance = (transactions: Transaction[]): number => {
-  return transactions
-    .filter((t) => t.status === "completed" || t.status === "succeeded")
-    .reduce((total, transaction) => {
-      // L'amount est en centimes, on divise par 100
-      const amountInDollars = transaction.amount / 100;
-      return transaction.type === "deposit"
-        ? total + amountInDollars
-        : total - amountInDollars;
-    }, 0);
-};
-
-/**
- * Filtre les transactions récentes (7 derniers jours)
- */
-export const getRecentTransactions = (
-  transactions: Transaction[],
-  days: number = 7
-): Transaction[] => {
-  const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - days);
-
-  return transactions
-    .filter((t) => new Date(t.date) >= cutoffDate)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-};
-
 export default {
   fetchUserTransactions,
-  calculateTotalBalance,
-  getRecentTransactions,
 };
