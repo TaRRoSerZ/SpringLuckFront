@@ -1,12 +1,13 @@
 import "../styles/Navbar.css";
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
+import { isAuthenticated, logout, login } from "../keycloak/keycloak";
 
 const Navbar = () => {
   const [isBannerVisible, setIsBannerVisible] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   // Auth and balance UI
-  const [hasToken, setHasToken] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [balance, setBalance] = useState<number>(0);
   const [isBalanceMenuOpen, setIsBalanceMenuOpen] = useState<boolean>(false);
   const [isMobile, setIsMobile] = useState<boolean>(() => {
@@ -28,18 +29,18 @@ const Navbar = () => {
     setIsBannerVisible(false);
   }
 
-  // Initialize token + balance from localStorage and keep in sync.
+  // Initialize token + balance from sessionStorage and keep in sync.
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setHasToken(!!token);
+    // Vérifie l'authentification avec la fonction du service
+    setIsLoggedIn(isAuthenticated());
 
-    const rawBalance = localStorage.getItem("balance");
+    const rawBalance = sessionStorage.getItem("balance");
     const parsed = rawBalance ? Number(rawBalance) : 0;
     setBalance(Number.isFinite(parsed) ? parsed : 0);
 
     const onStorage = (e: StorageEvent) => {
-      if (e.key === "token") {
-        setHasToken(!!e.newValue);
+      if (e.key === "access_token" || e.key === "refresh_token") {
+        setIsLoggedIn(isAuthenticated());
       }
       if (e.key === "balance") {
         const v = e.newValue ? Number(e.newValue) : 0;
@@ -146,9 +147,19 @@ const Navbar = () => {
             <li className="nav-item" onClick={closeMenu}>
               <Link to="/support">Support</Link>
             </li>
-            {!hasToken && (
+            {!isLoggedIn && (
               <li className="nav-item" onClick={closeMenu}>
-                <Link to="/login">Login</Link>
+                <button
+                  onClick={login}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "inherit",
+                    cursor: "pointer",
+                    font: "inherit",
+                  }}>
+                  Login
+                </button>
               </li>
             )}
           </ul>
@@ -177,8 +188,16 @@ const Navbar = () => {
                 />
               </svg>
             </label>
-            {!hasToken ? (
-              <Link className="login-button" to="/login">
+            {!isLoggedIn ? (
+              <button
+                className="login-button"
+                onClick={login}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "inherit",
+                  cursor: "pointer",
+                }}>
                 <svg
                   width="24"
                   height="24"
@@ -193,7 +212,7 @@ const Navbar = () => {
                     strokeLinejoin="round"
                   />
                 </svg>
-              </Link>
+              </button>
             ) : (
               <div
                 className={`balance ${isBalanceMenuOpen ? "open" : ""}`}
@@ -297,6 +316,30 @@ const Navbar = () => {
                     </svg>
                     Mon profil
                   </Link>
+                  <button
+                    className="logout-dropdown-btn"
+                    role="menuitem"
+                    onClick={() => {
+                      handleBalanceAction();
+                      logout();
+                    }}>
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden>
+                      <path
+                        d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9M16 17L21 12M21 12L16 7M21 12H9"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    Se déconnecter
+                  </button>
                 </div>
               </div>
             )}

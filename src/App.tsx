@@ -1,5 +1,6 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
 
 import GameContainer from "./components/GameContainer";
 import HeroSection from "./components/HeroSection";
@@ -7,11 +8,62 @@ import Navbar from "./components/Navbar";
 import GameSection from "./components/GameSection";
 import VipHeroSection from "./components/VipHeroSection";
 import Footer from "./components/Footer";
-import LoginPage from "./components/LoginPage";
-import SignupPage from "./components/SignupPage";
 import DepositPage from "./components/DepositPage";
+import Dashboard from "./components/Dashboard";
+import { initKeycloak, getToken } from "./keycloak/keycloak";
+import { syncUser } from "./services/authService_new";
 
 function App() {
+  const [keycloakInitialized, setKeycloakInitialized] = useState(false);
+  const isInitializing = useRef(false);
+
+  useEffect(() => {
+    // Empêcher l'initialisation multiple en StrictMode
+    if (isInitializing.current) {
+      return;
+    }
+
+    isInitializing.current = true;
+
+    initKeycloak(
+      async () => {
+        console.log("Keycloak initialized - user authenticated");
+
+        // Synchroniser avec le backend
+        const token = getToken();
+        if (token) {
+          const syncSuccess = await syncUser(token);
+          if (syncSuccess) {
+            console.log("✅ User synchronized with backend");
+          } else {
+            console.warn("⚠️ User sync failed, but proceeding anyway");
+          }
+        }
+
+        setKeycloakInitialized(true);
+      },
+      () => {
+        console.log("Keycloak initialized - user not authenticated");
+        setKeycloakInitialized(true);
+      }
+    );
+  }, []);
+
+  if (!keycloakInitialized) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          color: "var(--text-color)",
+        }}>
+        Loading...
+      </div>
+    );
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -28,9 +80,8 @@ function App() {
           }
         />
         <Route path="/game/:id" element={<GameContainer />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
         <Route path="/deposit" element={<DepositPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
   );

@@ -223,6 +223,28 @@
   color: var(--primary-color);
 }
 
+.logout-dropdown-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--text-color);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--text-font);
+  font-size: 1rem;
+  width: 100%;
+  text-align: left;
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.logout-dropdown-btn:hover {
+  background: hsl(from var(--secondary-color) h s calc(l + 4));
+  color: #ff4444;
+}
+
 .search-input {
   border: none;
   background-color: hsl(from var(--secondary-color) h s calc(l + 2));

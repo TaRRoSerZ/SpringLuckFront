@@ -107,6 +107,54 @@
   box-shadow: 0 0 0 0 transparent;
 }
 
+.login-form-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: hsl(from var(--details-color) h s calc(l - 10));
+}
+
+.login-form-btn:disabled:hover {
+  background: hsl(from var(--details-color) h s calc(l - 10));
+  transform: none;
+}
+
+/* Login input disabled state */
+.login-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Loading and error states */
+.login-status {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-color);
+  font-size: 0.95rem;
+}
+
+.login-error {
+  padding: 12px 16px;
+  background: rgba(244, 67, 54, 0.1);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.login-error p {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Error text style for simple error messages */
+.error-text {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  margin-top: 12px;
+  text-align: center;
+}
+
 .form-separator {
   height: 1px;
   background: hsl(from var(--secondary-color) h calc(s - 36) calc(l + 16));
@@ -118,6 +166,9 @@
   font-size: 0.9rem;
   font-weight: 300;
   color: var(--primary-color);
+  background: transparent;
+  border: none;
+  cursor: pointer;
 }
 
 .signup-link:hover,
