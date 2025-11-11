@@ -18,7 +18,6 @@ function App() {
   const isInitializing = useRef(false);
 
   useEffect(() => {
-    // Empêcher l'initialisation multiple en StrictMode
     if (isInitializing.current) {
       return;
     }
@@ -29,12 +28,11 @@ function App() {
       async () => {
         console.log("Keycloak initialized - user authenticated");
 
-        // Synchroniser avec le backend
         const token = getToken();
         if (token) {
-          const syncSuccess = await syncUser(token);
+          const syncSuccess = await syncUser();
           if (syncSuccess) {
-            console.log("✅ User synchronized with backend");
+            console.log("User synchronized with backend");
           } else {
             console.warn("⚠️ User sync failed, but proceeding anyway");
           }
@@ -59,7 +57,7 @@ function App() {
           height: "100vh",
           color: "var(--text-color)",
         }}>
-        Loading...
+        <div className="loader"></div>
       </div>
     );
   }

@@ -9,7 +9,8 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
-import { getUserInfo } from "../keycloak/keycloak";
+import { getToken, getUserInfo } from "../keycloak/keycloak";
+import { getUserData } from "../services/authService_new";
 
 // Initialiser Stripe avec la clé publique
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
@@ -47,26 +48,26 @@ const DepositForm = () => {
     setMessage("");
 
     try {
-      // 1️⃣ Récupérer l'userId depuis le token Keycloak
       const userInfo = getUserInfo();
-      if (!userInfo || !userInfo.sub) {
+      const token = getToken();
+      const userData = await getUserData();
+      if (!userInfo || !userData || !userData.id) {
         setMessage("User not authenticated. Please log in.");
         setLoading(false);
         return;
       }
 
-      // 2️⃣ Appeler le backend pour créer un PaymentIntent
       const response = await fetch(
         "http://localhost:8083/stripe/create-payment-intent",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${sessionStorage.getItem("access_token")}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             amount: Math.round(parseFloat(amount) * 100), // Convertir en centimes
-            userId: userInfo.sub,
+            userId: userData.id,
             userEmail: userInfo.email,
           }),
         }
@@ -79,7 +80,6 @@ const DepositForm = () => {
 
       const { clientSecret } = await response.json();
 
-      // 3️⃣ Confirmer le paiement avec Stripe
       const cardElement = elements.getElement(CardElement);
       if (!cardElement) {
         throw new Error("Card element not found");
@@ -94,25 +94,19 @@ const DepositForm = () => {
         }
       );
 
-      // 4️⃣ Gérer le résultat
       if (error) {
         setMessage(`Payment failed: ${error.message}`);
         console.error("Payment error:", error);
       } else if (paymentIntent && paymentIntent.status === "succeeded") {
-        setMessage("✅ Deposit successful! Redirecting to dashboard...");
+        setMessage("Deposit successful! Redirecting to dashboard...");
 
-        // Mettre à jour le solde dans sessionStorage
-        // L'amount est en dollars, on le garde tel quel
-        const currentBalance = parseFloat(
-          sessionStorage.getItem("balance") || "0"
-        );
-        const newBalance = currentBalance + parseFloat(amount);
-        sessionStorage.setItem("balance", newBalance.toString());
+        const newBalance = (userData.balance / 100).toFixed(2);
+        sessionStorage.setItem("balance", newBalance);
 
         // Déclencher un événement pour notifier le Navbar
         window.dispatchEvent(new Event("storage"));
 
-        // Rediriger vers le dashboard après 1.5 secondes
+        // Rediriger vers le dashboard après 1.5 seconde
         setTimeout(() => {
           navigate("/dashboard");
         }, 1500);
@@ -130,13 +124,12 @@ const DepositForm = () => {
   return (
     <form className="deposit-form" onSubmit={handleSubmit}>
       <div className="deposit-inputs">
-        {/* Amount Input */}
         <div className="deposit-input-group">
           <label htmlFor="amount" className="deposit-label">
             Amount to deposit
           </label>
           <div className="amount-input-wrapper">
-            <span className="currency-symbol">$</span>
+            <span className="currency-symbol">€</span>
             <input
               className="deposit-input amount-input"
               type="text"
@@ -151,7 +144,6 @@ const DepositForm = () => {
           </div>
         </div>
 
-        {/* Card Element de Stripe */}
         <div className="deposit-input-group">
           <label htmlFor="card-element" className="deposit-label">
             Card details
@@ -180,7 +172,6 @@ const DepositForm = () => {
         </div>
       </div>
 
-      {/* Test card info */}
       <div className="test-card-info">
         <p className="info-title">Test Mode</p>
         <p className="info-text">
@@ -189,13 +180,10 @@ const DepositForm = () => {
         <p className="info-text">Any future expiry date and any 3-digit CVC</p>
       </div>
 
-      {/* Message de retour */}
       {message && (
         <div
           className={`deposit-message ${
-            message.includes("✅") || message.includes("successful")
-              ? "success"
-              : "error"
+            message.includes("successful") ? "success" : "error"
           }`}>
           {message}
         </div>
