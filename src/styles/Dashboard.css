@@ -33,6 +33,7 @@
   font-size: 2.5rem;
   color: var(--text-color);
   margin-bottom: 8px;
+  text-align: left;
 }
 
 .user-name {
@@ -43,6 +44,7 @@
 .welcome-subtitle {
   font-size: 1rem;
   color: hsl(from var(--text-color) h s calc(l - 25));
+  text-align: left;
 }
 
 .logout-btn {
@@ -55,12 +57,13 @@
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 200ms ease;
+  transition: all 0.3s ease;
 }
 
 .logout-btn:hover {
-  background: rgba(244, 67, 54, 0.25);
-  transform: translateY(-2px);
+  background: rgba(244, 67, 54, 0.3);
+  border-color: rgba(244, 67, 54, 0.5);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.25);
 }
 
 /* Stats Grid */
@@ -79,17 +82,24 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  transition: transform 200ms ease, box-shadow 200ms ease;
+  transition: all 0.3s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: hsl(from var(--secondary-color) h calc(s - 20) calc(l + 25));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .stat-card.balance-card {
   border-color: rgba(167, 238, 67, 0.3);
   background: rgba(167, 238, 67, 0.05);
+}
+
+.stat-card.balance-card:hover {
+  border-color: rgba(167, 238, 67, 0.5);
+  background: rgba(167, 238, 67, 0.1);
+  box-shadow: 0 8px 24px rgba(167, 238, 67, 0.15);
 }
 
 .stat-icon {
@@ -187,12 +197,13 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  transition: transform 150ms ease, background 150ms ease;
+  transition: all 0.3s ease;
 }
 
 .transaction-item:hover {
-  background: rgba(0, 0, 0, 0.3);
-  transform: translateX(4px);
+  background: rgba(0, 0, 0, 0.35);
+  border-color: hsl(from var(--text-color) h s calc(l / 3));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .transaction-icon {
@@ -312,14 +323,14 @@
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  transition: all 200ms ease;
+  transition: all 0.3s ease;
   font-family: var(--text-font);
 }
 
 .action-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: hsl(from var(--text-color) h s calc(l / 3));
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .action-btn.deposit {
@@ -327,7 +338,9 @@
 }
 
 .action-btn.deposit:hover {
-  background: rgba(167, 238, 67, 0.08);
+  background: rgba(167, 238, 67, 0.12);
+  border-color: rgba(167, 238, 67, 0.5);
+  box-shadow: 0 6px 20px rgba(167, 238, 67, 0.2);
 }
 
 .action-btn.games {
@@ -335,7 +348,9 @@
 }
 
 .action-btn.games:hover {
-  background: rgba(33, 150, 243, 0.08);
+  background: rgba(33, 150, 243, 0.12);
+  border-color: rgba(33, 150, 243, 0.5);
+  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.2);
 }
 
 .action-icon {
