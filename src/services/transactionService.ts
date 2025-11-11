@@ -3,12 +3,14 @@
 const API_BASE_URL = "http://localhost:8083";
 
 export interface Transaction {
-  id: number;
+  id: string;
   userId: string;
   amount: number;
   type: string;
   status: string;
-  createdAt: string;
+  date: string;
+  betId?: string | null;
+  stripeIntentId?: string | null;
   description?: string;
 }
 
@@ -44,14 +46,18 @@ export const fetchUserTransactions = async (
 };
 
 /**
- * Calcule le total des transactions
+ * Calcule le total des transactions (seulement les completed)
  */
 export const calculateTotalBalance = (transactions: Transaction[]): number => {
-  return transactions.reduce((total, transaction) => {
-    return transaction.type === "deposit"
-      ? total + transaction.amount
-      : total - transaction.amount;
-  }, 0);
+  return transactions
+    .filter((t) => t.status === "completed" || t.status === "succeeded")
+    .reduce((total, transaction) => {
+      // L'amount est en centimes, on divise par 100
+      const amountInDollars = transaction.amount / 100;
+      return transaction.type === "deposit"
+        ? total + amountInDollars
+        : total - amountInDollars;
+    }, 0);
 };
 
 /**
@@ -65,11 +71,8 @@ export const getRecentTransactions = (
   cutoffDate.setDate(cutoffDate.getDate() - days);
 
   return transactions
-    .filter((t) => new Date(t.createdAt) >= cutoffDate)
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    .filter((t) => new Date(t.date) >= cutoffDate)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
 export default {
