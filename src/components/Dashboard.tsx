@@ -223,9 +223,13 @@ const Dashboard = () => {
                 {transactions.slice(0, 10).map((transaction) => (
                   <div
                     key={transaction.id}
-                    className={`transaction-item ${transaction.type}`}>
+                    className={`transaction-item ${transaction.type} ${transaction.status}`}>
                     <div className="transaction-icon">
-                      {transaction.type === "DEPOSIT" ? "💵" : "🎰"}
+                      {transaction.status === "PENDING"
+                        ? "⏳"
+                        : transaction.type === "DEPOSIT"
+                        ? "💵"
+                        : "🎰"}
                     </div>
                     <div className="transaction-details">
                       <p className="transaction-description">
@@ -255,7 +259,9 @@ const Dashboard = () => {
                     <div className="transaction-amount">
                       <p
                         className={`amount ${
-                          transaction.type === "DEPOSIT"
+                          transaction.status === "PENDING"
+                            ? "pending"
+                            : transaction.type === "DEPOSIT"
                             ? "positive"
                             : "negative"
                         }`}>
