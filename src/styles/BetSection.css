@@ -2,6 +2,7 @@
 .bet-panel {
   width: 100%;
   max-width: 100%;
+  padding: 0 10%;
   margin: 24px auto;
   box-sizing: border-box;
 }
@@ -189,6 +190,10 @@ div.balance-amount {
 
 /* Responsive */
 @media (max-width: 768px) {
+  .bet-panel {
+    padding: 0 4%;
+  }
+
   .bet-panel-inner {
     padding: 20px;
   }

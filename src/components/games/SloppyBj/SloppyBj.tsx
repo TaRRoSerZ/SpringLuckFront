@@ -1,13 +1,12 @@
 // SloppyBj.tsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./SloppyBj.css";
 import Navbar from "../../Navbar";
 import BetSection from "../../BetSection";
 import Player from "./Player";
 import Dealer from "./Dealer";
 import GameStatus from "./GameStatus";
-import { createTransaction } from "../../../services/transactionService";
-import { getUserData } from "../../../services/authService_new";
+import { useGameBalance } from "../../../hooks/useGameBalance";
 
 type CardValue = number | "A";
 type Card = { name: string; value: CardValue };
@@ -105,56 +104,35 @@ const SloppyBj = () => {
   const [gameStatus, setGameStatus] = useState("");
 
   const [betAmount, setBetAmount] = useState<number>(0);
-  const [balance, setBalance] = useState<number>(0);
 
-  async function reloadBalance() {
-    try {
-      const userData = await getUserData();
-      if (userData && userData.balance !== undefined) {
-        const balanceInEuros = userData.balance / 100;
-        setBalance(balanceInEuros);
-        sessionStorage.setItem("balance", balanceInEuros.toFixed(2));
-      }
-    } catch (error) {
-      console.error("Error reloading balance:", error);
-    }
-  }
-
-  useEffect(() => {
-    reloadBalance();
-  }, []);
+  // Utiliser le hook centralisé pour la balance et les transactions
+  const { balance, placeBet, recordWin } = useGameBalance();
 
   async function handlePlace(amount: number) {
-    if (amount <= 0 || amount > balance) return false;
+    const success = await placeBet(amount);
+    if (!success) return false;
 
-    try {
-      await createTransaction(amount, "BET_PLACED");
-      await reloadBalance();
-      setBetAmount(amount);
+    setBetAmount(amount);
 
-      // Lancer automatiquement la partie
-      setIsGameStarted(true);
-      setGameStatus("");
+    // Lancer automatiquement la partie
+    setIsGameStarted(true);
+    setGameStatus("");
 
-      // Distribuer les cartes
-      const yourCard1 = getRandomCard();
-      const yourCard2 = getRandomCard();
-      const bjCard1 = getRandomCard();
-      const bjCard2 = getRandomCard();
+    // Distribuer les cartes
+    const yourCard1 = getRandomCard();
+    const yourCard2 = getRandomCard();
+    const bjCard1 = getRandomCard();
+    const bjCard2 = getRandomCard();
 
-      const yourNewCards = [yourCard1, yourCard2];
-      const bjNewCards = [bjCard1, bjCard2];
+    const yourNewCards = [yourCard1, yourCard2];
+    const bjNewCards = [bjCard1, bjCard2];
 
-      setYourCards(yourNewCards);
-      setBjCards(bjNewCards);
-      setYourScore(calculateScore(yourNewCards));
-      setBjScore(calculateScore(bjNewCards));
+    setYourCards(yourNewCards);
+    setBjCards(bjNewCards);
+    setYourScore(calculateScore(yourNewCards));
+    setBjScore(calculateScore(bjNewCards));
 
-      return true;
-    } catch (error) {
-      console.error("Error placing bet:", error);
-      return false;
-    }
+    return true;
   }
 
   const handleStand = async () => {
@@ -171,21 +149,11 @@ const SloppyBj = () => {
     console.log("Result from dealerTurn:", result);
 
     if (result.includes("You Win") || result.includes("Dealer Busts")) {
-      try {
-        await createTransaction(betAmount * 2, "BET_WIN");
-        await reloadBalance();
-      } catch (error) {
-        console.error("Error processing win:", error);
-      }
+      await recordWin(betAmount * 2);
     }
 
     if (result.includes("Draw")) {
-      try {
-        await createTransaction(betAmount, "BET_WIN");
-        await reloadBalance();
-      } catch (error) {
-        console.error("Error processing win:", error);
-      }
+      await recordWin(betAmount);
     }
 
     setIsGameStarted(false);
@@ -245,8 +213,8 @@ const SloppyBj = () => {
             ) : null}
           </div>
         </div>
-        <BetSection balance={balance} onPlace={handlePlace} currency="€" />
       </section>
+      <BetSection balance={balance} onPlace={handlePlace} currency="€" />
     </>
   );
 };
