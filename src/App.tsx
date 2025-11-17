@@ -1,6 +1,7 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
+import { BalanceProvider } from "./contexts/BalanceContext";
 
 import GameContainer from "./components/GameContainer";
 import HeroSection from "./components/HeroSection";
@@ -66,6 +67,7 @@ function App() {
 	}
 
 	return (
+   <BalanceProvider>
 		<BrowserRouter>
 			<Routes>
 				<Route
@@ -87,6 +89,7 @@ function App() {
 				<Route path="/admin" element={<AdminPage />} />
 			</Routes>
 		</BrowserRouter>
+   </BalanceProvider>
 	);
 }
 

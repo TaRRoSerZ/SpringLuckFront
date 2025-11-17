@@ -3,7 +3,7 @@ import Navbar from "../../Navbar";
 import Footer from "../../Footer";
 import BetSection from "../../BetSection";
 import { useEffect, useState } from "react";
-import { useGameBalance } from "../../../hooks/useGameBalance";
+import { useBalance } from "../../../contexts/BalanceContext";
 
 interface Tile {
   isBomb: boolean;
@@ -29,9 +29,8 @@ export default function BombOrClaat() {
   const [betAmount, setBetAmount] = useState<number>(0);
   const [betPlaced, setBetPlaced] = useState<boolean>(false);
 
-  // Utiliser le hook centralisé pour la balance et les transactions
-  const { balance, placeBet, recordWin } = useGameBalance();
-
+  // Utiliser le contexte pour la balance et les transactions
+  const { balance, placeBet, recordWin } = useBalance();
   async function handlePlace(amount: number) {
     const success = await placeBet(amount);
     if (!success) return false;

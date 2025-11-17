@@ -6,7 +6,7 @@ import BetSection from "../../BetSection";
 import Player from "./Player";
 import Dealer from "./Dealer";
 import GameStatus from "./GameStatus";
-import { useGameBalance } from "../../../hooks/useGameBalance";
+import { useBalance } from "../../../contexts/BalanceContext";
 
 type CardValue = number | "A";
 type Card = { name: string; value: CardValue };
@@ -105,9 +105,8 @@ const SloppyBj = () => {
 
   const [betAmount, setBetAmount] = useState<number>(0);
 
-  // Utiliser le hook centralisé pour la balance et les transactions
-  const { balance, placeBet, recordWin } = useGameBalance();
-
+  // Utiliser le contexte pour la balance et les transactions
+  const { balance, placeBet, recordWin } = useBalance();
   async function handlePlace(amount: number) {
     const success = await placeBet(amount);
     if (!success) return false;

@@ -2,7 +2,7 @@ import "./RiggedPaperScissors.css";
 import Navbar from "../../Navbar";
 import { useState } from "react";
 import BetSection from "../../BetSection";
-import { useGameBalance } from "../../../hooks/useGameBalance";
+import { useBalance } from "../../../contexts/BalanceContext";
 
 type Choice = "rock" | "paper" | "scissors";
 
@@ -33,9 +33,8 @@ export default function RiggedPaperScissors() {
   // Betting / balance state
   const [betAmount, setBetAmount] = useState<number>(0);
 
-  // Utiliser le hook centralisé pour la balance et les transactions
-  const { balance, placeBet, recordWin } = useGameBalance();
-
+  // Utiliser le contexte pour la balance et les transactions
+  const { balance, placeBet, recordWin } = useBalance();
   async function handlePlace(amount: number) {
     const success = await placeBet(amount);
     if (!success) return false;
