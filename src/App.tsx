@@ -10,6 +10,7 @@ import VipHeroSection from "./components/VipHeroSection";
 import Footer from "./components/Footer";
 import DepositPage from "./components/DepositPage";
 import Dashboard from "./components/Dashboard";
+import TransactionDetails from "./components/TransactionDetails";
 import { initKeycloak, getToken } from "./keycloak/keycloak";
 import { syncUser } from "./services/authService_new";
 
@@ -80,6 +81,7 @@ function App() {
         <Route path="/game/:id" element={<GameContainer />} />
         <Route path="/deposit" element={<DepositPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/transaction/:id" element={<TransactionDetails />} />
       </Routes>
     </BrowserRouter>
   );

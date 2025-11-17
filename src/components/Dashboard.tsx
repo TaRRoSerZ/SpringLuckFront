@@ -33,6 +33,7 @@ const Dashboard = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -219,62 +220,115 @@ const Dashboard = () => {
                 </p>
               </div>
             ) : (
-              <div className="transactions-list">
-                {transactions.slice(0, 10).map((transaction) => (
-                  <div
-                    key={transaction.id}
-                    className={`transaction-item ${transaction.type} ${transaction.status}`}>
-                    <div className="transaction-icon">
-                      {transaction.status === "PENDING"
-                        ? "⏳"
-                        : transaction.type === "DEPOSIT"
-                        ? "💵"
-                        : "🎰"}
-                    </div>
-                    <div className="transaction-details">
-                      <p className="transaction-description">
-                        {transaction.description || transaction.type}
-                      </p>
-                      <p className="transaction-date">
-                        {(() => {
-                          try {
-                            // Le backend envoie une date au format "YYYY-MM-DD"
-                            const date = new Date(transaction.date);
-
-                            if (isNaN(date.getTime())) {
-                              return "Invalid date";
-                            }
-
-                            return date.toLocaleDateString("fr-FR", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            });
-                          } catch {
-                            return "Invalid date";
-                          }
-                        })()}
-                      </p>
-                    </div>
-                    <div className="transaction-amount">
-                      <p
-                        className={`amount ${
-                          transaction.status === "PENDING"
-                            ? "pending"
+              <>
+                <div className="transactions-list">
+                  {transactions
+                    .slice(0, showAllTransactions ? transactions.length : 3)
+                    .map((transaction) => (
+                      <div
+                        key={transaction.id}
+                        className={`transaction-item ${transaction.type} ${transaction.status}`}
+                        onClick={() =>
+                          navigate(`/transaction/${transaction.id}`)
+                        }>
+                        <div className="transaction-icon">
+                          {transaction.status === "PENDING"
+                            ? "⏳"
                             : transaction.type === "DEPOSIT"
-                            ? "positive"
-                            : "negative"
-                        }`}>
-                        {transaction.type === "DEPOSIT" ? "+" : "-"}$
-                        {(transaction.amount / 100).toFixed(2)}
-                      </p>
-                      <span className={`status-badge ${transaction.status}`}>
-                        {transaction.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                            ? "💵"
+                            : "🎰"}
+                        </div>
+                        <div className="transaction-details">
+                          <p className="transaction-description">
+                            {transaction.description || transaction.type}
+                          </p>
+                          <p className="transaction-date">
+                            {(() => {
+                              try {
+                                // Le backend envoie une date au format "YYYY-MM-DD"
+                                const date = new Date(transaction.date);
+
+                                if (isNaN(date.getTime())) {
+                                  return "Invalid date";
+                                }
+
+                                return date.toLocaleDateString("fr-FR", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                });
+                              } catch {
+                                return "Invalid date";
+                              }
+                            })()}
+                          </p>
+                        </div>
+                        <div className="transaction-amount">
+                          <p
+                            className={`amount ${
+                              transaction.status === "PENDING"
+                                ? "pending"
+                                : transaction.type === "DEPOSIT"
+                                ? "positive"
+                                : "negative"
+                            }`}>
+                            {transaction.type === "DEPOSIT" ? "+" : "-"}$
+                            {(transaction.amount / 100).toFixed(2)}
+                          </p>
+                          <span
+                            className={`status-badge ${transaction.status}`}>
+                            {transaction.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+                {transactions.length > 3 && (
+                  <button
+                    className="show-more-btn"
+                    onClick={() =>
+                      setShowAllTransactions(!showAllTransactions)
+                    }>
+                    {showAllTransactions ? (
+                      <>
+                        <span>Show less</span>
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M18 15L12 9L6 15"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </>
+                    ) : (
+                      <>
+                        <span>Show all ({transactions.length})</span>
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg">
+                          <path
+                            d="M6 9L12 15L18 9"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </>
+                    )}
+                  </button>
+                )}
+              </>
             )}
           </div>
 
