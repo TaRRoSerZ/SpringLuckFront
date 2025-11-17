@@ -1,4 +1,4 @@
-// Service pour gérer les transactions utilisateur
+import { getUserInfo, getToken, isAuthenticated } from "../keycloak/keycloak";
 
 const API_BASE_URL = "http://localhost:8083";
 
@@ -45,6 +45,36 @@ export const fetchUserTransactions = async (
   }
 };
 
+export async function createTransaction(amount: number, type: string) {
+  const userInfo = getUserInfo();
+  const token = getToken();
+
+  if (!userInfo || !token || !isAuthenticated()) {
+    console.error("User info or token is missing, cannot create transaction");
+    return null;
+  }
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/users/transaction?email=${
+        userInfo.email
+      }&type=${type}&amount=${amount * 100}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const text = await response.text();
+    return text;
+  } catch (error) {
+    console.error("Error creating transaction:", error);
+    return null;
+  }
+}
+
 export default {
   fetchUserTransactions,
+  createTransaction,
 };

@@ -24,7 +24,11 @@ const Dealer: React.FC<DealerProps> = ({
       />
       <p className="bj-score">
         <span className="bj-guy-score-text">
-          {isDealerCardRevealed ? score : calculateScore([cards[0]])}
+          {isDealerCardRevealed
+            ? score
+            : cards.length > 0
+            ? calculateScore([cards[0]])
+            : 0}
         </span>
       </p>
       <div className="sloppy-cards">
