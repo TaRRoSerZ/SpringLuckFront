@@ -195,12 +195,13 @@
   border: 1px solid hsl(from var(--text-color) h s calc(l / 5));
   border-left: 4px solid hsl(from var(--text-color) h s calc(l / 5));
   border-radius: 12px;
-  padding: 20px;
-  min-height: 100px;
+  padding: 16px 20px;
+  min-height: 70px;
   display: flex;
   align-items: center;
   gap: 16px;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .transaction-item:hover {
@@ -331,6 +332,35 @@
   background: rgba(244, 67, 54, 0.2);
   color: #f44336;
   border: 1px solid rgba(244, 67, 54, 0.4);
+}
+
+/* Show More Button */
+.show-more-btn {
+  width: 100%;
+  padding: 16px;
+  margin-top: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid hsl(from var(--text-color) h s calc(l / 5));
+  border-radius: 10px;
+  color: var(--text-color);
+  font-family: var(--text-font);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.show-more-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: hsl(from var(--text-color) h s calc(l / 3));
+}
+
+.show-more-btn svg {
+  transition: transform 0.3s ease;
 }
 
 /* Empty State */
