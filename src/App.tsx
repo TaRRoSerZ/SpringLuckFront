@@ -1,6 +1,7 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
+import { BalanceProvider } from "./contexts/BalanceContext";
 
 import GameContainer from "./components/GameContainer";
 import HeroSection from "./components/HeroSection";
@@ -64,26 +65,28 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <Navbar />
-              <HeroSection />
-              <GameSection />
-              <VipHeroSection />
-              <Footer />
-            </>
-          }
-        />
-        <Route path="/game/:id" element={<GameContainer />} />
-        <Route path="/deposit" element={<DepositPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/transaction/:id" element={<TransactionDetails />} />
-      </Routes>
-    </BrowserRouter>
+    <BalanceProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <Navbar />
+                <HeroSection />
+                <GameSection />
+                <VipHeroSection />
+                <Footer />
+              </>
+            }
+          />
+          <Route path="/game/:id" element={<GameContainer />} />
+          <Route path="/deposit" element={<DepositPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/transaction/:id" element={<TransactionDetails />} />
+        </Routes>
+      </BrowserRouter>
+    </BalanceProvider>
   );
 }
 
