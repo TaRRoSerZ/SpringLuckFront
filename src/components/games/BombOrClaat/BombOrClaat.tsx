@@ -1,379 +1,156 @@
-import React, { useCallback, useMemo, useState } from "react";
 import "./BombOrClaat.css";
 import Navbar from "../../Navbar";
+import Footer from "../../Footer";
 import BetSection from "../../BetSection";
+import { useEffect, useRef, useState } from "react";
 
-type Cell = {
-	id: number;
-	row: number;
-	col: number;
-	hasBomb: boolean;
-	revealed: boolean;
-	flagged: boolean;
-};
-
-type GameState = "idle" | "running" | "lost" | "won" | "cashed";
-
-type Props = {
-	rows?: number;
-	cols?: number;
-	defaultBombs?: number;
-};
-
-function shuffleInPlace<T>(arr: T[], rng: () => number) {
-	for (let i = arr.length - 1; i > 0; i--) {
-		const j = Math.floor(rng() * (i + 1));
-		[arr[i], arr[j]] = [arr[j], arr[i]];
-	}
+interface Tile {
+	isBomb: boolean;
+	isRevealed: boolean;
 }
 
-function makeRng(seed: number) {
-	let s = seed >>> 0;
-	return () => {
-		s = (1664525 * s + 1013904223) >>> 0;
-		return (s & 0xfffffff) / 0x10000000;
-	};
+interface Level {
+	name: string;
+	numberOfBomb: number;
 }
 
-export default function BombOrClaat({
-	rows = 5,
-	cols = 5,
-	defaultBombs = 3,
-}: Props) {
-	const [bombs, setBombs] = useState(defaultBombs);
-	const [state, setState] = useState<GameState>("idle");
-	const [cells, setCells] = useState<Cell[]>([]);
-	const [safeRevealed, setSafeRevealed] = useState(0);
-	const [seed, setSeed] = useState<number>(() => Date.now() % 2147483647);
-	const total = rows * cols;
+export default function BombOrClaat() {
+	const [numberOfBomb, setNumberOfBomb] = useState<number>(3);
+	const numberOfTiles = 32;
+	const [safePicks, setSafePicks] = useState<number>(0);
+	const [tiles, setTiles] = useState<Tile[]>([]);
+	const [multiplier, setMultiplier] = useState<number>(0);
+	const [gameOver, setGameOver] = useState<boolean>(false);
+	const [isGameActive, setIsGameActive] = useState<boolean>(false);
+	const [activeLevel, setActiveLevel] = useState<string>("easy");
+	const levels: Level[] = [
+		{ name: "easy", numberOfBomb: 3 },
+		{ name: "medium", numberOfBomb: 5 },
+		{ name: "hard", numberOfBomb: 8 },
+		{ name: "expert", numberOfBomb: 12 },
+	];
 
-	// Bet & payout state
-	const [betAmount, setBetAmount] = useState<number>(0);
-	const [betPlaced, setBetPlaced] = useState<boolean>(false);
-
-	// load balance from localStorage
-	const [balance, setBalance] = useState<number>(() => {
-		const raw = localStorage.getItem("balance");
-		const n = raw ? Number(raw) : 0;
-		return Number.isFinite(n) ? n : 0;
-	});
-
-	// helper to update localStorage balance
-	function updateBalance(newBal: number) {
-		setBalance(newBal);
-		localStorage.setItem("balance", String(Number(newBal.toFixed(2))));
+	function shuffle(array: any[]) {
+		for (let i = array.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[array[i], array[j]] = [array[j], array[i]];
+		}
+		return array;
 	}
 
-	// handle placing a bet from BetSection
-	function handlePlace(amount: number) {
-		if (amount <= 0) return false;
-		if (amount > balance) return false;
-		// deduct immediately
-		updateBalance(Number((balance - amount).toFixed(2)));
-		setBetAmount(amount);
-		setBetPlaced(true);
-		return true;
-	}
-	const [finalPayout, setFinalPayout] = useState<number | null>(null);
-	const [showPayout, setShowPayout] = useState(false);
+	function probabilityOfKSafePicks() {
+		let safe = numberOfTiles - numberOfBomb;
+		let prob = 1;
 
-	const startGame = useCallback(() => {
-		// ensure bet is placed and > 0
-		if (!betPlaced || betAmount <= 0) return;
-
-		const rng = makeRng(seed);
-		const base: Cell[] = Array.from({ length: total }, (_, i) => ({
-			id: i,
-			row: Math.floor(i / cols),
-			col: i % cols,
-			hasBomb: false,
-			revealed: false,
-			flagged: false,
-		}));
-		const ids = base.map((c) => c.id);
-		shuffleInPlace(ids, rng);
-		const bombSet = new Set<number>(ids.slice(0, bombs));
-		const prepared = base.map((c) => ({ ...c, hasBomb: bombSet.has(c.id) }));
-
-		setCells(prepared);
-		setSafeRevealed(0);
-		setState("running");
-	}, [bombs, cols, seed, total, betPlaced, betAmount]);
-
-	const reset = useCallback(() => {
-		setSeed((s) => (s * 1103515245 + 12345) % 2147483647);
-		setCells([]);
-		setSafeRevealed(0);
-		setState("idle");
-		setBetPlaced(false);
-		setBetAmount(0);
-	}, []);
-
-	const revealedCount = safeRevealed;
-	const remainingTiles = total - revealedCount;
-	const remainingBombs =
-		bombs - cells.filter((c) => c.revealed && c.hasBomb).length;
-	const remainingSafe = total - bombs - revealedCount;
-
-	const currentMultiplier = useMemo(() => {
-		if (revealedCount === 0) return 1;
-		let m = 1;
-		for (let k = 0; k < revealedCount; k++) {
-			m *= (total - k) / (total - bombs - k);
+		for (let i = 0; i < safePicks; i++) {
+			prob *= (safe - i) / (numberOfTiles - i);
 		}
-		return Number(m.toFixed(3));
-	}, [revealedCount, total, bombs]);
-
-	function computeMultiplierFor(revealed: number) {
-		if (revealed === 0) return 1;
-		let m = 1;
-		for (let k = 0; k < revealed; k++) {
-			m *= (total - k) / (total - bombs - k);
-		}
-		return Number(m.toFixed(3));
+		return prob;
 	}
 
-	const nextPickMultiplier = useMemo(() => {
-		if (state !== "running") return 0;
-		if (remainingSafe <= 0) return 0;
-		const oddsFactor =
-			remainingTiles > remainingBombs
-				? remainingTiles / (remainingTiles - remainingBombs)
-				: 0;
-		return Number((currentMultiplier * oddsFactor).toFixed(3));
-	}, [currentMultiplier, remainingBombs, remainingSafe, remainingTiles, state]);
+	function payout(rtp = 0.995) {
+		const prob = probabilityOfKSafePicks();
+		console.log(rtp / prob);
+		return rtp / prob;
+	}
 
-	const handleReveal = useCallback(
-		(cell: Cell) => {
-			if (state !== "running") return;
-			if (cell.revealed) return;
-
-			setCells((prev) =>
-				prev.map((c) => (c.id === cell.id ? { ...c, revealed: true } : c))
-			);
-
-			if (cell.hasBomb) {
-				// reveal all cells so the player can see bomb placements
-				setCells((prev) => prev.map((c) => ({ ...c, revealed: true })));
-				setState("lost");
-			} else {
-				setSafeRevealed((n) => n + 1);
-				if (safeRevealed + 1 >= total - bombs) {
-					// reveal all on win as well
-					setCells((prev) => prev.map((c) => ({ ...c, revealed: true })));
-					setState("won");
-					// compute payout and show
-					const payout = Number(
-						(betAmount * computeMultiplierFor(safeRevealed + 1)).toFixed(2)
-					);
-					setFinalPayout(payout);
-					setShowPayout(true);
-				}
-			}
-		},
-		[bombs, safeRevealed, state, total]
-	);
-
-	const cashOut = useCallback(() => {
-		if (state !== "running") return;
-		// reveal all cells when player cashes out
-		setCells((prev) => prev.map((c) => ({ ...c, revealed: true })));
-		setState("cashed");
-		// compute payout and show
-		const payout = Number((betAmount * currentMultiplier).toFixed(2));
-		setFinalPayout(payout);
-		setShowPayout(true);
-		// credit payout to balance
-		updateBalance(Number((balance + payout).toFixed(2)));
-	}, [state]);
-
-	const statusText = useMemo(() => {
-		switch (state) {
-			case "idle":
-				return "Choisis le nombre de bombes puis démarre la partie.";
-			case "running":
-				return "À toi de jouer ! Évite les bombes et trouve des diamants.";
-			case "lost":
-				return "💥 Boom ! Tu as touché une bombe. Réessaie !";
-			case "won":
-				return "🎉 Incroyable ! Tu as trouvé tous les diamants !";
-			case "cashed":
-				return "✅ Tu as encaissé tes gains.";
+	function handleTileClick(index: number) {
+		const newTiles = [...tiles];
+		if (newTiles[index].isRevealed) return;
+		newTiles[index].isRevealed = true;
+		setTiles(newTiles);
+		if (!newTiles[index].isBomb) {
+			setSafePicks((prev) => prev + 1);
+			setMultiplier(payout());
+		} else {
+			setGameOver(true);
 		}
-	}, [state]);
+	}
 
-	const canChangeBombs = state === "idle";
+	function handleChangeLevel(level: Level) {
+		if (level.name === activeLevel) return;
+		setActiveLevel(level.name);
+		setNumberOfBomb(level.numberOfBomb);
+	}
+
+	function createTiles() {
+		const newTiles: Tile[] = [];
+
+		for (let i = 0; i < numberOfTiles; i++) {
+			newTiles.push({ isBomb: i < numberOfBomb, isRevealed: false });
+		}
+		const shuffledTiles = shuffle([...newTiles]);
+		setTiles(shuffledTiles);
+	}
+
+	useEffect(() => {
+		createTiles();
+	}, [numberOfBomb]);
 
 	return (
 		<>
 			<Navbar />
-			<div className="wrapper bmborclt">
-				{/* Titre global en haut, sticky */}
-				<div className="pageHeader">
-					<h2 className="title">Bomb or claat</h2>
-				</div>
-
-				{/* Layout 2 colonnes : grille à gauche, panneau à droite */}
-				<div className="content">
-					<div className="left bmborclt">
-						<div className="gridOuter">
-							<div
-								className="grid"
-								style={{
-									gridTemplateColumns: `repeat(${cols}, 1fr)`,
-									gridTemplateRows: `repeat(${rows}, 1fr)`,
-									["--rows" as any]: rows,
-									["--cols" as any]: cols,
-								}}
-								role="grid"
-								aria-disabled={state !== "running"}
-							>
-								{(cells.length > 0
-									? cells
-									: Array.from({ length: total }, (_, i) => ({
-											id: i,
-											row: Math.floor(i / cols),
-											col: i % cols,
-											hasBomb: false,
-											revealed: false,
-											flagged: false,
-									  }))
-								).map((cell) => {
-									const isDisabled = state !== "running" || cell.revealed;
-									const cellStateClass = cell.revealed
-										? cell.hasBomb
-											? "bomb"
-											: "diamond"
-										: "hidden";
-
-									return (
-										<button
-											key={cell.id}
-											className={`cell ${cellStateClass}`}
-											onClick={() => handleReveal(cell as Cell)}
-											disabled={isDisabled}
-											aria-label={
-												cell.revealed
-													? cell.hasBomb
-														? "Bombe révélée"
-														: "Diamant révélé"
-													: "Case cachée"
-											}
-											role="gridcell"
-										>
-											<span
-												className={`icon ${
-													cell.revealed
-														? cell.hasBomb
-															? "icon--bomb"
-															: "icon--diamond"
-														: "icon--hidden"
-												}`}
-												aria-hidden="true"
-											/>
-										</button>
-									);
-								})}
-							</div>
-						</div>
-					</div>
-
-					<aside className="right sidebar">
-						<div className="controls">
-							<label className="control">
-								<span>Bombes</span>
-								<input
-									type="number"
-									min={1}
-									max={Math.max(1, total - 1)}
-									value={bombs}
-									disabled={!canChangeBombs}
-									onChange={(e) => {
-										const v = Number(e.target.value);
-										const clamped = Math.max(1, Math.min(v, total - 1));
-										setBombs(clamped);
-									}}
-									className="input"
-								/>
-							</label>
-							{state === "idle" ? (
-								<button
-									className="primary"
-									onClick={startGame}
-									disabled={betAmount <= 0}
-								>
-									Démarrer
-								</button>
+			<section className="bomb-or-claat-game">
+				<div className="bomb-or-claat-content">
+					{tiles.map((tile, index) => (
+						<div
+							key={index}
+							className={`${tile.isBomb ? "bomb" : ""} box ${
+								tile.isRevealed ? "revealed" : ""
+							}`}
+							onClick={() => handleTileClick(index)}
+						>
+							{tile.isRevealed ? (
+								tile.isBomb ? (
+									<img src="/icons/bomb.svg" alt="bombe" width={50} />
+								) : (
+									<img src="/icons/diamond.svg" alt="diamant" width={50} />
+								)
 							) : (
-								<>
-									<button className="secondary" onClick={reset}>
-										Réinitialiser
-									</button>
-									{state === "running" && (
-										<button className="cash" onClick={cashOut}>
-											Encaisser ({currentMultiplier}×)
-										</button>
-									)}
-								</>
+								""
 							)}
 						</div>
-
-						<div className="statsRow" aria-live="polite">
-							<div className="stat">
-								<span className="statLabel">État</span>
-								<span className="statValue">{statusText}</span>
-							</div>
-							<div className="stat">
-								<span className="statLabel">Grille</span>
-								<span className="statValue">
-									{rows}×{cols} ({total} cases)
-								</span>
-							</div>
-							<div className="stat">
-								<span className="statLabel">Révélées</span>
-								<span className="statValue">{revealedCount}</span>
-							</div>
-							<div className="stat">
-								<span className="statLabel">Sûres restantes</span>
-								<span className="statValue">{Math.max(0, remainingSafe)}</span>
-							</div>
-							<div className="stat">
-								<span className="statLabel">Multiplicateur</span>
-								<span className="statValue">
-									{currentMultiplier}×
-									{state === "running" && nextPickMultiplier > 0 && (
-										<span className="nextHint">
-											{" "}
-											→ Prochain pick: {nextPickMultiplier}×
-										</span>
-									)}
-								</span>
-							</div>
-						</div>
-					</aside>
+					))}
 				</div>
-			</div>
-			<BetSection balance={balance} onPlace={handlePlace} />
-
-			{/* Payout modal */}
-			{showPayout && finalPayout !== null && (
-				<div className="payout-modal" role="dialog" aria-modal="true">
-					<div className="payout-card">
-						<h3>Résultat</h3>
-						<p className="payout-amount">{finalPayout.toFixed(2)} $</p>
+				<div className="bomb-or-claat-settings-tab">
+					<div className="bomb-or-claat-settings-buttons">
+						{levels.map((level, index) => (
+							<button
+								key={index}
+								className={`level-button ${
+									activeLevel === level.name ? "active" : ""
+								}`}
+								onClick={() => {
+									handleChangeLevel(level);
+								}}
+							>
+								{level.name}
+							</button>
+						))}
+					</div>
+					<div className="bomb-or-claat-settings-actions">
+						<p>Multiplier : {multiplier.toFixed(2)}x</p>
+						<button className="bomb-or-claat-cash-out-button">Cash out</button>
+					</div>
+				</div>
+				<div className={`bomb-or-claat-game-over ${gameOver ? "on" : "off"}`}>
+					<div className="bomb-or-claat-lose-card">
+						<h2>Game Over !</h2>
 						<button
-							className="primary"
-							onClick={() => {
-								setShowPayout(false);
-								setFinalPayout(null);
-								reset();
-							}}
+							onClick={() => (
+								setGameOver(false),
+								createTiles(),
+								setMultiplier(0),
+								setSafePicks(0)
+							)}
 						>
-							OK
+							Close
 						</button>
 					</div>
 				</div>
-			)}
+			</section>
+			<BetSection />
+			<Footer />
 		</>
 	);
 }
