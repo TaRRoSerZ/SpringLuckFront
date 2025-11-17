@@ -13,78 +13,81 @@ import Dashboard from "./components/Dashboard";
 import TransactionDetails from "./components/TransactionDetails";
 import { initKeycloak, getToken } from "./keycloak/keycloak";
 import { syncUser } from "./services/authService_new";
+import AdminPage from "./components/AdminPage";
 
 function App() {
-  const [keycloakInitialized, setKeycloakInitialized] = useState(false);
-  const isInitializing = useRef(false);
+	const [keycloakInitialized, setKeycloakInitialized] = useState(false);
+	const isInitializing = useRef(false);
 
-  useEffect(() => {
-    if (isInitializing.current) {
-      return;
-    }
+	useEffect(() => {
+		if (isInitializing.current) {
+			return;
+		}
 
-    isInitializing.current = true;
+		isInitializing.current = true;
 
-    initKeycloak(
-      async () => {
-        console.log("Keycloak initialized - user authenticated");
+		initKeycloak(
+			async () => {
+				console.log("Keycloak initialized - user authenticated");
 
-        const token = getToken();
-        if (token) {
-          const syncSuccess = await syncUser();
-          if (syncSuccess) {
-            console.log("User synchronized with backend");
-          } else {
-            console.warn("⚠️ User sync failed, but proceeding anyway");
-          }
-        }
+				const token = getToken();
+				if (token) {
+					const syncSuccess = await syncUser();
+					if (syncSuccess) {
+						console.log("User synchronized with backend");
+					} else {
+						console.warn("⚠️ User sync failed, but proceeding anyway");
+					}
+				}
 
-        setKeycloakInitialized(true);
-      },
-      () => {
-        console.log("Keycloak initialized - user not authenticated");
-        setKeycloakInitialized(true);
-      }
-    );
-  }, []);
+				setKeycloakInitialized(true);
+			},
+			() => {
+				console.log("Keycloak initialized - user not authenticated");
+				setKeycloakInitialized(true);
+			}
+		);
+	}, []);
 
-  if (!keycloakInitialized) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          color: "var(--text-color)",
-        }}>
-        <div className="loader"></div>
-      </div>
-    );
-  }
+	if (!keycloakInitialized) {
+		return (
+			<div
+				style={{
+					display: "flex",
+					justifyContent: "center",
+					alignItems: "center",
+					height: "100vh",
+					color: "var(--text-color)",
+				}}
+			>
+				<div className="loader"></div>
+			</div>
+		);
+	}
 
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <>
-              <Navbar />
-              <HeroSection />
-              <GameSection />
-              <VipHeroSection />
-              <Footer />
-            </>
-          }
-        />
-        <Route path="/game/:id" element={<GameContainer />} />
-        <Route path="/deposit" element={<DepositPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/transaction/:id" element={<TransactionDetails />} />
-      </Routes>
-    </BrowserRouter>
-  );
+	return (
+		<BrowserRouter>
+			<Routes>
+				<Route
+					path="/"
+					element={
+						<>
+							<Navbar />
+							<HeroSection />
+							<GameSection />
+							<VipHeroSection />
+							<Footer />
+						</>
+					}
+				/>
+				<Route path="/game/:id" element={<GameContainer />} />
+				<Route path="/deposit" element={<DepositPage />} />
+				<Route path="/dashboard" element={<Dashboard />} />
+				<Route path="/transaction/:id" element={<TransactionDetails />} />
+				<Route path="/admin" element={<AdminPage />} />
+			</Routes>
+		</BrowserRouter>
+	);
 }
 
 export default App;
