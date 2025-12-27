@@ -99,4 +99,16 @@ export const getUserInfo = () => {
   return keycloak.tokenParsed;
 };
 
+export const getRoles = () => {
+  if (!isAuthenticated()) {
+    return [];
+  }
+  const roles = keycloak.realmAccess?.roles || [];
+  return roles;
+};
+
+export const isAdmin = () => {
+  return isAuthenticated() && getRoles().includes("ADMIN");
+};
+
 export default keycloak;

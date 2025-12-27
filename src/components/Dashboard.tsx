@@ -221,67 +221,78 @@ const Dashboard = () => {
               </div>
             ) : (
               <>
-                <div className="transactions-list">
-                  {transactions
-                    .slice(0, showAllTransactions ? transactions.length : 3)
-                    .map((transaction) => (
-                      <div
-                        key={transaction.id}
-                        className={`transaction-item ${transaction.type} ${transaction.status}`}
-                        onClick={() =>
-                          navigate(`/transaction/${transaction.id}`)
-                        }>
-                        <div className="transaction-icon">
-                          {transaction.status === "PENDING"
-                            ? "⏳"
-                            : transaction.type === "DEPOSIT"
-                            ? "💵"
-                            : "🎰"}
-                        </div>
-                        <div className="transaction-details">
-                          <p className="transaction-description">
-                            {transaction.description || transaction.type}
-                          </p>
-                          <p className="transaction-date">
-                            {(() => {
-                              try {
-                                // Le backend envoie une date au format "YYYY-MM-DD"
-                                const date = new Date(transaction.date);
-
-                                if (isNaN(date.getTime())) {
+                <div className="transactions-table-wrapper">
+                  <table className="transactions-table">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {transactions
+                        .slice(0, showAllTransactions ? transactions.length : 3)
+                        .map((transaction) => (
+                          <tr
+                            key={transaction.id}
+                            className="transaction-row"
+                            onClick={() =>
+                              navigate(`/transaction/${transaction.id}`)
+                            }>
+                            <td>
+                              {(() => {
+                                try {
+                                  const date = new Date(transaction.date);
+                                  if (isNaN(date.getTime())) {
+                                    return "Invalid date";
+                                  }
+                                  return date.toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "2-digit",
+                                    day: "2-digit",
+                                  });
+                                } catch {
                                   return "Invalid date";
                                 }
-
-                                return date.toLocaleDateString("fr-FR", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                });
-                              } catch {
-                                return "Invalid date";
-                              }
-                            })()}
-                          </p>
-                        </div>
-                        <div className="transaction-amount">
-                          <p
-                            className={`amount ${
-                              transaction.status === "PENDING"
-                                ? "pending"
-                                : transaction.type === "DEPOSIT"
-                                ? "positive"
-                                : "negative"
-                            }`}>
-                            {transaction.type === "DEPOSIT" ? "+" : "-"}$
-                            {(transaction.amount / 100).toFixed(2)}
-                          </p>
-                          <span
-                            className={`status-badge ${transaction.status}`}>
-                            {transaction.status}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                              })()}
+                            </td>
+                            <td>
+                              {userInfo?.preferred_username ||
+                                userInfo?.email?.split("@")[0] ||
+                                "user"}
+                            </td>
+                            <td>€{(transaction.amount / 100).toFixed(0)}</td>
+                            <td>
+                              <span
+                                className={`type-badge ${transaction.type.toLowerCase()}`}>
+                                {transaction.type === "DEPOSIT" && "• Deposit"}
+                                {transaction.type === "BET_PLACED" && "• Bet"}
+                                {transaction.type === "BET_WIN" && "• Win"}
+                                {transaction.type === "BET_LOSS" && "• Loss"}
+                                {transaction.type === "REFUND" && "• Refund"}
+                                {transaction.type === "BONUS" && "• Bonus"}
+                                {transaction.type === "CASHBACK" &&
+                                  "• Cashback"}
+                                {transaction.type === "PROMO" && "• Promo"}
+                                {![
+                                  "DEPOSIT",
+                                  "BET_PLACED",
+                                  "BET_WIN",
+                                  "BET_LOSS",
+                                  "REFUND",
+                                  "BONUS",
+                                  "CASHBACK",
+                                  "PROMO",
+                                ].includes(transaction.type) &&
+                                  `• ${transaction.type}`}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
                 </div>
                 {transactions.length > 3 && (
                   <button

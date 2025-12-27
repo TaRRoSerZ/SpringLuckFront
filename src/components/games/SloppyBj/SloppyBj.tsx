@@ -212,8 +212,8 @@ const SloppyBj = () => {
             ) : null}
           </div>
         </div>
+        <BetSection balance={balance} onPlace={handlePlace} currency="€" />
       </section>
-      <BetSection balance={balance} onPlace={handlePlace} currency="€" />
     </>
   );
 };

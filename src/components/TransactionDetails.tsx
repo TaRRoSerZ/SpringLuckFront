@@ -149,10 +149,24 @@ const TransactionDetails = () => {
             <p className="amount-label">Amount</p>
             <p
               className={`amount-value ${
-                transaction.type === "DEPOSIT" ? "positive" : "negative"
+                transaction.type === "DEPOSIT" ||
+                transaction.type === "BET_WIN" ||
+                transaction.type === "REFUND" ||
+                transaction.type === "BONUS" ||
+                transaction.type === "CASHBACK" ||
+                transaction.type === "PROMO"
+                  ? "positive"
+                  : "negative"
               }`}>
-              {transaction.type === "DEPOSIT" ? "+" : "-"}$
-              {(transaction.amount / 100).toFixed(2)}
+              {transaction.type === "DEPOSIT" ||
+              transaction.type === "BET_WIN" ||
+              transaction.type === "REFUND" ||
+              transaction.type === "BONUS" ||
+              transaction.type === "CASHBACK" ||
+              transaction.type === "PROMO"
+                ? "+"
+                : "-"}
+              €{(transaction.amount / 100).toFixed(2)}
             </p>
           </div>
 

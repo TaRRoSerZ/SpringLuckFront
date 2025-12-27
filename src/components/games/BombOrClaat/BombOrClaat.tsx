@@ -127,6 +127,8 @@ export default function BombOrClaat() {
     <>
       <Navbar />
       <section className="bomb-or-claat-game">
+        <BetSection balance={balance} onPlace={handlePlace} currency="€" />
+
         <div className="bomb-or-claat-content">
           {tiles.map((tile, index) => (
             <div
@@ -187,8 +189,6 @@ export default function BombOrClaat() {
           </div>
         </div>
       </section>
-      <BetSection balance={balance} onPlace={handlePlace} currency="€" />
-      <Footer />
     </>
   );
 }

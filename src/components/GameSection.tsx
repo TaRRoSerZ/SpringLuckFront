@@ -1,31 +1,9 @@
 import "../styles/GameSection.css";
 import GameCard from "./GameCard";
 import { useRef, useEffect, useState, useCallback } from "react";
+import { GAMES } from "../constants/games";
 
-const cardsContent = [
-  {
-    id: 1,
-    title: "Bomb or Claat",
-    imageUrl: "/icons/BombOrClaat.svg",
-    tag: "New",
-  },
-  {
-    id: 2,
-    title: "Sloppy BJ",
-    imageUrl: "/icons/SloppyBJ.svg",
-    tag: "Hot",
-  },
-  {
-    id: 3,
-    title: "Diddy Scothèque",
-    imageUrl: "/icons/diddySco.svg",
-  },
-  {
-    id: 4,
-    title: "Rigged Paper Scissors",
-    imageUrl: "/icons/rigged-paper-scissors.svg",
-  },
-];
+const cardsContent = GAMES;
 
 const GameSection = () => {
   const listRef = useRef<HTMLDivElement>(null);
@@ -77,22 +55,19 @@ const GameSection = () => {
       id="games"
       className="game-section"
       data-can-left={canLeft ? "true" : "false"}
-      data-can-right={canRight ? "true" : "false"}
-    >
+      data-can-right={canRight ? "true" : "false"}>
       <div className="scroll-buttons">
         <button
           className={`scroll-button left ${canLeft ? "is-visible" : ""}`}
           aria-label="Scroll Left"
           onClick={() => scrollByOneCard(-1)}
-          disabled={!canLeft}
-        >
+          disabled={!canLeft}>
           <svg
             width="16"
             height="16"
             viewBox="0 0 16 16"
             fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               d="M15 8H1M1 8L8 1M1 8L8 15"
               stroke="#D6DDE6"
@@ -106,15 +81,13 @@ const GameSection = () => {
           className={`scroll-button right ${canRight ? "is-visible" : ""}`}
           aria-label="Scroll Right"
           onClick={() => scrollByOneCard(1)}
-          disabled={!canRight}
-        >
+          disabled={!canRight}>
           <svg
             width="16"
             height="16"
             viewBox="0 0 16 16"
             fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+            xmlns="http://www.w3.org/2000/svg">
             <path
               d="M1 8H15M15 8L8 1M15 8L8 15"
               stroke="#D6DDE6"
@@ -126,8 +99,7 @@ const GameSection = () => {
         </button>
       </div>
       <div
-        className={`game-shadow right ${canRight ? "is-visible" : ""}`}
-      ></div>
+        className={`game-shadow right ${canRight ? "is-visible" : ""}`}></div>
       <div className={`game-shadow left ${canLeft ? "is-visible" : ""}`}></div>
       <div className="game-cards-container" ref={listRef}>
         {cardsContent.map((card) => (
