@@ -1,9 +1,6 @@
 /* BetSection styles - clean and modern design */
 .bet-panel {
-  width: 100%;
-  max-width: 100%;
-  padding: 0 10%;
-  margin: 24px auto;
+  height: 100%;
   box-sizing: border-box;
 }
 
