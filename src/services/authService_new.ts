@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:8083";
+const API_BASE_URL = "https://springluck.onrender.com";
 
 import { getUserInfo, isAuthenticated, getToken } from "../keycloak/keycloak";
 

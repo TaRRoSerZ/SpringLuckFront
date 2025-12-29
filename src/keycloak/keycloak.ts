@@ -1,8 +1,8 @@
 import Keycloak from "keycloak-js";
 
 const keycloak = new Keycloak({
-  url: "http://localhost:9090",
-  realm: "springluck",
+  url: "https://keycloak-springluck.onrender.com", // http://localhost:9090
+  realm: "springluck-realm",
   clientId: "springluck-app",
 });
 

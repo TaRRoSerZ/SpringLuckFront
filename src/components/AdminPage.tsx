@@ -37,7 +37,7 @@ export default function AdminPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [searchTerm, setSearchTerm] = useState("");
 
-	const API_URL = "http://localhost:8083";
+	const API_URL = "https://springluck.onrender.com";
 
 	// Check if user is admin (vous pouvez adapter cette logique selon vos besoins)
 	useEffect(() => {

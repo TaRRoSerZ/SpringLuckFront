@@ -1,6 +1,6 @@
 import { getUserInfo, getToken, isAuthenticated } from "../keycloak/keycloak";
 
-const API_BASE_URL = "http://localhost:8083";
+const API_BASE_URL = "https://springluck.onrender.com";
 
 export interface Transaction {
   id: string;
