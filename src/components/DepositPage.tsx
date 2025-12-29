@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import {
-  Elements,
-  CardElement,
-  useStripe,
-  useElements,
+	Elements,
+	CardElement,
+	useStripe,
+	useElements,
 } from "@stripe/react-stripe-js";
 import { getToken, getUserInfo } from "../keycloak/keycloak";
 import { getUserData } from "../services/authService_new";
@@ -16,197 +16,199 @@ import { getUserData } from "../services/authService_new";
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
 
 const DepositForm = () => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const navigate = useNavigate();
-  const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+	const stripe = useStripe();
+	const elements = useElements();
+	const navigate = useNavigate();
+	const [amount, setAmount] = useState("");
+	const [loading, setLoading] = useState(false);
+	const [message, setMessage] = useState("");
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    // Only allow numbers and decimal point
-    if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
-      setAmount(value);
-    }
-  };
+	const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const value = e.target.value;
+		// Only allow numbers and decimal point
+		if (value === "" || /^\d*\.?\d{0,2}$/.test(value)) {
+			setAmount(value);
+		}
+	};
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
 
-    if (!stripe || !elements) {
-      setMessage("Stripe is not loaded yet. Please wait.");
-      return;
-    }
+		if (!stripe || !elements) {
+			setMessage("Stripe is not loaded yet. Please wait.");
+			return;
+		}
 
-    if (!amount || parseFloat(amount) <= 0) {
-      setMessage("Please enter a valid amount.");
-      return;
-    }
+		if (!amount || parseFloat(amount) <= 0) {
+			setMessage("Please enter a valid amount.");
+			return;
+		}
 
-    setLoading(true);
-    setMessage("");
+		setLoading(true);
+		setMessage("");
 
-    try {
-      const userInfo = getUserInfo();
-      const token = getToken();
-      const userData = await getUserData();
-      if (!userInfo || !userData || !userData.id) {
-        setMessage("User not authenticated. Please log in.");
-        setLoading(false);
-        return;
-      }
+		try {
+			const userInfo = getUserInfo();
+			const token = getToken();
+			const userData = await getUserData();
+			if (!userInfo || !userData || !userData.id) {
+				setMessage("User not authenticated. Please log in.");
+				setLoading(false);
+				return;
+			}
 
-      const response = await fetch(
-        "http://localhost:8083/stripe/create-payment-intent",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            amount: Math.round(parseFloat(amount) * 100), // Convertir en centimes
-            userId: userData.id,
-            userEmail: userInfo.email,
-          }),
-        }
-      );
+			const response = await fetch(
+				"https://springluck.onrender.com/stripe/create-payment-intent",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({
+						amount: Math.round(parseFloat(amount) * 100), // Convertir en centimes
+						userId: userData.id,
+						userEmail: userInfo.email,
+					}),
+				}
+			);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to create payment intent");
-      }
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(errorData.message || "Failed to create payment intent");
+			}
 
-      const { clientSecret } = await response.json();
+			const { clientSecret } = await response.json();
 
-      const cardElement = elements.getElement(CardElement);
-      if (!cardElement) {
-        throw new Error("Card element not found");
-      }
+			const cardElement = elements.getElement(CardElement);
+			if (!cardElement) {
+				throw new Error("Card element not found");
+			}
 
-      const { error, paymentIntent } = await stripe.confirmCardPayment(
-        clientSecret,
-        {
-          payment_method: {
-            card: cardElement,
-          },
-        }
-      );
+			const { error, paymentIntent } = await stripe.confirmCardPayment(
+				clientSecret,
+				{
+					payment_method: {
+						card: cardElement,
+					},
+				}
+			);
 
-      if (error) {
-        setMessage(`Payment failed: ${error.message}`);
-        console.error("Payment error:", error);
-      } else if (paymentIntent && paymentIntent.status === "succeeded") {
-        setMessage("Deposit successful! Redirecting to dashboard...");
+			if (error) {
+				setMessage(`Payment failed: ${error.message}`);
+				console.error("Payment error:", error);
+			} else if (paymentIntent && paymentIntent.status === "succeeded") {
+				setMessage("Deposit successful! Redirecting to dashboard...");
 
-        const newBalance = (userData.balance / 100).toFixed(2);
-        sessionStorage.setItem("balance", newBalance);
+				const newBalance = (userData.balance / 100).toFixed(2);
+				sessionStorage.setItem("balance", newBalance);
 
-        // Déclencher un événement pour notifier le Navbar
-        window.dispatchEvent(new Event("storage"));
+				// Déclencher un événement pour notifier le Navbar
+				window.dispatchEvent(new Event("storage"));
 
-        // Rediriger vers le dashboard après 1.5 seconde
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 1500);
-      }
-    } catch (error) {
-      console.error("Deposit error:", error);
-      setMessage(
-        `Error: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+				// Rediriger vers le dashboard après 1.5 seconde
+				setTimeout(() => {
+					navigate("/dashboard");
+				}, 1500);
+			}
+		} catch (error) {
+			console.error("Deposit error:", error);
+			setMessage(
+				`Error: ${error instanceof Error ? error.message : "Unknown error"}`
+			);
+		} finally {
+			setLoading(false);
+		}
+	};
 
-  return (
-    <form className="deposit-form" onSubmit={handleSubmit}>
-      <div className="deposit-inputs">
-        <div className="deposit-input-group">
-          <label htmlFor="amount" className="deposit-label">
-            Amount to deposit
-          </label>
-          <div className="amount-input-wrapper">
-            <span className="currency-symbol">€</span>
-            <input
-              className="deposit-input amount-input"
-              type="text"
-              name="amount"
-              id="amount"
-              placeholder="0.00"
-              value={amount}
-              onChange={handleAmountChange}
-              disabled={loading}
-              required
-            />
-          </div>
-        </div>
+	return (
+		<form className="deposit-form" onSubmit={handleSubmit}>
+			<div className="deposit-inputs">
+				<div className="deposit-input-group">
+					<label htmlFor="amount" className="deposit-label">
+						Amount to deposit
+					</label>
+					<div className="amount-input-wrapper">
+						<span className="currency-symbol">€</span>
+						<input
+							className="deposit-input amount-input"
+							type="text"
+							name="amount"
+							id="amount"
+							placeholder="0.00"
+							value={amount}
+							onChange={handleAmountChange}
+							disabled={loading}
+							required
+						/>
+					</div>
+				</div>
 
-        <div className="deposit-input-group">
-          <label htmlFor="card-element" className="deposit-label">
-            Card details
-          </label>
-          <div className="stripe-card-element">
-            <CardElement
-              id="card-element"
-              options={{
-                style: {
-                  base: {
-                    fontSize: "16px",
-                    color: "#d6dde6",
-                    fontFamily:
-                      '"Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                    "::placeholder": {
-                      color: "#6b7280",
-                    },
-                  },
-                  invalid: {
-                    color: "#ff4444",
-                  },
-                },
-              }}
-            />
-          </div>
-        </div>
-      </div>
+				<div className="deposit-input-group">
+					<label htmlFor="card-element" className="deposit-label">
+						Card details
+					</label>
+					<div className="stripe-card-element">
+						<CardElement
+							id="card-element"
+							options={{
+								style: {
+									base: {
+										fontSize: "16px",
+										color: "#d6dde6",
+										fontFamily:
+											'"Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+										"::placeholder": {
+											color: "#6b7280",
+										},
+									},
+									invalid: {
+										color: "#ff4444",
+									},
+								},
+							}}
+						/>
+					</div>
+				</div>
+			</div>
 
-      <div className="test-card-info">
-        <p className="info-title">Test Mode</p>
-        <p className="info-text">
-          Use card: <strong>4242 4242 4242 4242</strong>
-        </p>
-        <p className="info-text">Any future expiry date and any 3-digit CVC</p>
-      </div>
+			<div className="test-card-info">
+				<p className="info-title">Test Mode</p>
+				<p className="info-text">
+					Use card: <strong>4242 4242 4242 4242</strong>
+				</p>
+				<p className="info-text">Any future expiry date and any 3-digit CVC</p>
+			</div>
 
-      {message && (
-        <div
-          className={`deposit-message ${
-            message.includes("successful") ? "success" : "error"
-          }`}>
-          {message}
-        </div>
-      )}
+			{message && (
+				<div
+					className={`deposit-message ${
+						message.includes("successful") ? "success" : "error"
+					}`}
+				>
+					{message}
+				</div>
+			)}
 
-      <button
-        className="deposit-btn"
-        type="submit"
-        disabled={loading || !stripe}>
-        {loading ? "Processing..." : `Deposit ${amount ? `$${amount}` : ""}`}
-      </button>
-    </form>
-  );
+			<button
+				className="deposit-btn"
+				type="submit"
+				disabled={loading || !stripe}
+			>
+				{loading ? "Processing..." : `Deposit ${amount ? `$${amount}` : ""}`}
+			</button>
+		</form>
+	);
 };
 
 const DepositPage = () => {
-  return (
-    <AuthLayout title="Deposit Funds">
-      <Elements stripe={stripePromise}>
-        <DepositForm />
-      </Elements>
-    </AuthLayout>
-  );
+	return (
+		<AuthLayout title="Deposit Funds">
+			<Elements stripe={stripePromise}>
+				<DepositForm />
+			</Elements>
+		</AuthLayout>
+	);
 };
 
 export default DepositPage;
